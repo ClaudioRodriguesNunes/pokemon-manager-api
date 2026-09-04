@@ -1,8 +1,10 @@
-import { IPokemon } from '../entities/pokemon.js';
+import { Pokemon } from '../entities/pokemon.js';
 
-export interface IPokemonRepositoryContract {
-  save(pokemon: IPokemon): Promise<void>;
-  findAll(): Promise<IPokemon[]>;
-  findById(id: string): Promise<IPokemon | null>;
-  update(id: string, pokemon: IPokemon): Promise<IPokemon | null>;
+export interface IPokemonRepository {
+  findAll(): Promise<Pokemon[]>;
+  findByType(type: string): Promise<Pokemon[]>;
+  findById(id: string): Promise<Pokemon | null>;
+  create(pokemon: Pokemon): Promise<void>;
+  update(pokemon: Pokemon): Promise<void>;
+  delete(id: string): Promise<void>;
 }

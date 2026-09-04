@@ -15,12 +15,14 @@
   "devDependencies": {
     "@types/express": "^5.0.6",
     "@types/node": "^26.4.0",
+    "@types/swagger-ui-express": "^4.1.8",
     "@typescript-eslint/eslint-plugin": "^8.68.0",
     "@typescript-eslint/parser": "^8.68.0",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.6",
     "prettier": "^3.9.6",
+    "swagger-autogen": "^2.23.7",
     "tsx": "^4.23.13",
     "typescript": "^5.9.3"
   },
@@ -111,6 +113,7 @@
     "strip-ansi": "^6.0.1",
     "strip-json-comments": "^3.1.1",
     "supports-color": "^7.2.0",
+    "swagger-ui-express": "^5.0.1",
     "synckit": "^0.11.13",
     "text-table": "^0.2.0",
     "tinyglobby": "^0.2.17",
