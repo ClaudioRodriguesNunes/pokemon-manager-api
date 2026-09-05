@@ -165,8 +165,6 @@ Esses termos aparecem juntos no projeto, mas representam coisas diferentes.
 
 Uma interface descreve uma estrutura ou contrato.
 
-Exemplo:
-
 ```ts
 export interface PokemonProps {
   id: string;
@@ -190,13 +188,11 @@ Já `IPokemonRepository` descreve quais operações qualquer repositório de Pok
 
 #### Instância
 
-Quando é executado:
-
 ```ts
 const pokemon = new Pokemon(input);
 ```
 
-é criada uma instância concreta da classe `Pokemon`.
+Nesse ponto é criada uma instância concreta da classe `Pokemon`.
 
 ---
 
@@ -233,7 +229,6 @@ valida todos os valores
     ↓
 ┌───────────────┬───────────────┐
 │ algum inválido│ todos válidos │
-│               │               │
 │ lança Error   │ altera estado │
 │ nada é alterado│ por completo │
 └───────────────┴───────────────┘
@@ -242,6 +237,12 @@ valida todos os valores
 Essa decisão foi validada manualmente durante os testes: um `PUT` com HP inválido foi rejeitado e a entidade preservou integralmente o estado anterior.
 
 O `id` é `readonly`, pois identifica a entidade e não deve ser alterado após sua criação.
+
+### Evidência 07 — Atualização e encapsulamento da entidade
+
+A execução mostra uma atualização válida, uma tentativa inválida com HP negativo e, em seguida, a consulta confirmando que o estado válido anterior foi preservado.
+
+![Evidência 07 - Atualização e encapsulamento da entidade](img/evidencia-07-atualizacao-e-encapsulamento-da-entidade.png)
 
 ---
 
@@ -274,8 +275,6 @@ Os Use Cases recebem a interface, e não a classe concreta:
 constructor(private pokemonRepository: IPokemonRepository) {}
 ```
 
-Assim:
-
 ```text
 Use Case
    ↓
@@ -291,8 +290,6 @@ Esse é o principal exemplo de inversão de dependência utilizado nesta entrega
 ---
 
 ## 6. Separação de responsabilidades
-
-Cada parte possui uma responsabilidade predominante:
 
 | Parte | Responsabilidade |
 |---|---|
@@ -326,8 +323,6 @@ app.use(express.json());
 
 `express.json()` interpreta o corpo JSON recebido e o disponibiliza em `req.body`.
 
-O fluxo de uma requisição é:
-
 ```text
 Cliente
   ↓ HTTP
@@ -344,21 +339,21 @@ Repository
 
 O Use Case não conhece `Request`, `Response`, `res.status()` ou qualquer outro recurso do Express. Essa tradução pertence ao Controller.
 
+### Evidência 02 — Inicialização da API
+
+A aplicação foi iniciada com `tsx watch` e o servidor ficou disponível na porta `3333`.
+
+![Evidência 02 - Inicialização da API](img/evidencia-02-inicializacao-da-api.png)
+
 ---
 
 ## 8. Params, Query e Body
 
-A API utiliza três formas diferentes de receber informações.
-
 ### Route Params
-
-Usado para identificar um recurso específico.
 
 ```http
 GET /api/v1/pokemons/25
 ```
-
-No Controller:
 
 ```ts
 req.params.id
@@ -366,21 +361,15 @@ req.params.id
 
 ### Query String
 
-Usada para filtrar a listagem.
-
 ```http
 GET /api/v1/pokemons?type=Fire
 ```
-
-No Controller:
 
 ```ts
 req.query.type
 ```
 
 ### Body JSON
-
-Usado principalmente em `POST` e `PUT`.
 
 ```json
 {
@@ -392,6 +381,12 @@ Usado principalmente em `POST` e `PUT`.
   "defense": 40
 }
 ```
+
+### Evidência 08 — Filtro por tipo e estatísticas
+
+A consulta com `?type=Fire` retornou apenas o Pokémon correspondente ao filtro, enquanto `/stats` refletiu a distribuição por tipo do catálogo.
+
+![Evidência 08 - Filtro por tipo e estatísticas](img/evidencia-08-filtro-por-tipo-e-estatisticas-do-catalogo.png)
 
 ---
 
@@ -412,8 +407,6 @@ export interface CreatePokemonDTO {
 
 Essa tipagem ajuda o programador e o compilador, mas não impede um cliente HTTP de enviar dados incorretos.
 
-Por isso há duas responsabilidades diferentes.
-
 ### Validação básica da entrada HTTP
 
 O Controller verifica aspectos estruturais, por exemplo:
@@ -424,15 +417,13 @@ O Controller verifica aspectos estruturais, por exemplo:
 
 ### Regras da entidade
 
-A entidade verifica regras que fazem parte de um Pokémon válido:
+A entidade verifica:
 
 - nome não vazio;
 - tipo pertencente ao `PokemonType`;
 - HP maior que zero;
 - ataque maior que zero;
 - defesa maior que zero.
-
-Assim:
 
 ```text
 Controller
@@ -445,8 +436,6 @@ Pokemon
 "O estado da entidade é válido?"
 ```
 
-Um exemplo dos testes realizados:
-
 ```text
 hp = "78"
 → problema de tipo na entrada HTTP
@@ -455,6 +444,12 @@ hp = -78
 → número recebido corretamente
 → viola regra da entidade
 ```
+
+### Evidência 06 — Validação de entrada e regras de domínio
+
+A bateria distinguiu os dois casos: `hp` como string foi rejeitado pela validação da entrada e `hp` negativo foi rejeitado pela regra da entidade.
+
+![Evidência 06 - Validação de entrada e regras de domínio](img/evidencia-06-validacao-de-entrada-e-regras-de-dominio.png)
 
 ---
 
@@ -472,8 +467,6 @@ A factory mantém uma única instância durante a execução da aplicação:
 const pokemonRepository = new InMemoryPokemonRepository();
 ```
 
-Isso permite que diferentes requisições compartilhem o mesmo catálogo enquanto o processo Node está ativo.
-
 ```text
 POST Pikachu
     ↓
@@ -481,6 +474,12 @@ Pokemon[] contém Pikachu
     ↓
 GET /25 encontra Pikachu
 ```
+
+### Evidência 04 — Criação, consulta e estado compartilhado em memória
+
+O Pokémon criado por `POST` permaneceu disponível para consultas posteriores durante a mesma execução do servidor.
+
+![Evidência 04 - Criação, consulta e persistência em memória](img/evidencia-04-criacao-consulta-e-persistencia-em-memoria.png)
 
 Porém, os dados não são persistidos de forma permanente.
 
@@ -493,13 +492,15 @@ servidor reiniciado
 → catálogo vazio
 ```
 
-Esse comportamento foi comprovado na bateria manual de testes.
+### Evidência 11 — Comportamento do repositório In-Memory
+
+Após reiniciar a aplicação, a listagem voltou a ficar vazia, demonstrando que o armazenamento permanece apenas na memória do processo.
+
+![Evidência 11 - Comportamento do repositório In-Memory](img/evidencia-11-comportamento-do-repositorio-in-memory.png)
 
 ### Stateless não significa ausência de armazenamento
 
 HTTP ser stateless significa que cada requisição deve conter as informações necessárias para ser compreendida. Isso não impede que o servidor mantenha dados.
-
-Portanto:
 
 ```text
 HTTP stateless
@@ -527,9 +528,43 @@ http://localhost:3333/api/v1/pokemons
 | `PUT` | `/api/v1/pokemons/:id` | atualizar | `200` | `400`, `404`, `500` |
 | `DELETE` | `/api/v1/pokemons/:id` | excluir | `204` | `404`, `500` |
 
-### Observação sobre `/stats`
+### Estado inicial e endpoint `/stats`
 
 A rota `/stats` é registrada antes de `/:id` para que a palavra `stats` não seja interpretada pelo Express como um identificador de Pokémon.
+
+### Evidência 03 — Estado inicial e endpoint de estatísticas
+
+Com o catálogo vazio, a listagem retornou `[]` e `/stats` retornou total igual a zero.
+
+![Evidência 03 - Estado inicial e endpoint de estatísticas](img/evidencia-03-estado-inicial-e-endpoint-de-estatisticas.png)
+
+### Regra de ID único
+
+O `CreatePokemonUseCase` verifica se o identificador já existe antes de cadastrar uma nova entidade.
+
+### Evidência 05 — Rejeição de Pokémon duplicado
+
+Uma segunda tentativa de cadastrar o mesmo ID retornou `400 Bad Request`, e o total do catálogo permaneceu inalterado.
+
+![Evidência 05 - Rejeição de Pokémon duplicado](img/evidencia-05-rejeicao-de-pokemon-duplicado.png)
+
+### Recurso inexistente e `404`
+
+Quando um Pokémon não existe, os Use Cases lançam `ResourceNotFoundError` e o Controller traduz essa condição para HTTP `404`.
+
+### Evidência 09 — Tratamento de recurso inexistente
+
+GET, PUT e DELETE para um ID inexistente retornaram `404 Not Found`.
+
+![Evidência 09 - Tratamento de recurso inexistente](img/evidencia-09-tratamento-de-recurso-inexistente-404.png)
+
+### Exclusão e `204 No Content`
+
+O DELETE de um Pokémon existente retorna `204 No Content`. A consulta posterior retorna `404`, e `/stats` reflete a remoção.
+
+### Evidência 10 — Exclusão e atualização do catálogo
+
+![Evidência 10 - Exclusão e atualização do catálogo](img/evidencia-10-exclusao-e-atualizacao-do-catalogo.png)
 
 ---
 
@@ -605,6 +640,12 @@ Compile o TypeScript:
 npm run build
 ```
 
+### Evidência 01 — Lint e Build
+
+O estado final do código passou pelo ESLint e pela compilação TypeScript sem erros.
+
+![Evidência 01 - Lint e Build](img/evidencia-01-lint-e-build.png)
+
 Inicie o servidor de desenvolvimento:
 
 ```powershell
@@ -666,8 +707,6 @@ O teste manual identificou esse comportamento. A implementação foi corrigida p
 
 A bateria foi repetida e confirmou que uma atualização inválida não deixa alterações parciais.
 
-Esse caso também mostra a diferença entre:
-
 ```text
 lint/build
 → verificam qualidade estática e compilação
@@ -678,50 +717,12 @@ bateria funcional
 
 ---
 
-## 16. Evidências selecionadas
+## 16. Conclusão da Entrega 1
 
-### Lint e Build
+A Entrega 1 consolidou três resultados principais:
 
-![Evidência 01 - Lint e Build](img/evidencia-01-Lint-e-Build.png)
+- **arquitetura em camadas aplicada**, com Domain, Application, Infrastructure e Main exercendo responsabilidades distintas;
+- **contrato REST funcional**, incluindo CRUD, filtro por tipo, estatísticas e tratamento de erros;
+- **comportamento validado manualmente**, incluindo regras de domínio, encapsulamento, códigos HTTP e características do repositório In-Memory.
 
-### Criação, consulta e estado em memória
-
-![Evidência 04 - Criação, consulta e persistência em memória](img/evidencia-04-Criacao-consulta-e-persistencia-em-memoria.png)
-
-### Validação da entrada e regras de domínio
-
-![Evidência 06 - Validação de entrada e regras de domínio](img/evidencia-06-Validação-de-entrada-e-regras-de-dominio.png)
-
-### Atualização e encapsulamento
-
-![Evidência 07 - Atualização e encapsulamento da entidade](img/evidencia-07-Atualizacao-e-encapsulamento-da-entidade.png)
-
-### Filtro por tipo e estatísticas
-
-![Evidência 08 - Filtro por tipo e estatísticas](img/evidencia-08-Filtro-por-tipo-e-estatisticas-do-catalogo.png)
-
-### Comportamento In-Memory
-
-![Evidência 11 - Comportamento do repositório In-Memory](img/evidencia-11-Comportamento-do-repositorio-In-Memory.png)
-
-As demais evidências da bateria permanecem disponíveis na pasta `img/`.
-
----
-
-## 17. Estado da Entrega 1
-
-Ao final da revisão e da bateria manual:
-
-- estrutura da Clean Architecture consolidada;
-- regra de dependência revisada;
-- CRUD REST funcional;
-- `/stats` preservado e integrado à arquitetura atual;
-- entidade `Pokemon` encapsulada;
-- atualização protegida contra estado parcial inválido;
-- entrada HTTP tipada e validada em runtime no nível básico;
-- erros `400` e `404` verificados;
-- repositório In-Memory validado durante execução e após reinício;
-- lint e build verificados;
-- evidências registradas para documentação e apresentação.
-
-**Entrega 1 consolidada: Arquitetura e Contrato REST.**
+O projeto encerra esta etapa com uma base coerente com os conteúdos estudados nas Aulas 1 a 4 e preparada para evoluir nas próximas entregas sem antecipar tecnologias que ainda não pertencem ao escopo atual.
