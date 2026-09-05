@@ -1,6 +1,7 @@
 import express from 'express';
 
-import { pokemonRoutes } from '../infrastructure/http/routes/pokemon-routes.js';
+import { createPokemonRoutes } from '../infrastructure/http/routes/pokemon-routes.js';
+import { makePokemonController } from './factories/make-pokemon-controller.js';
 
 const app = express();
 
@@ -13,6 +14,9 @@ app.use((req, res, next) => {
 
   next();
 });
+
+const pokemonController = makePokemonController();
+const pokemonRoutes = createPokemonRoutes(pokemonController);
 
 app.use('/api/v1/pokemons', pokemonRoutes);
 

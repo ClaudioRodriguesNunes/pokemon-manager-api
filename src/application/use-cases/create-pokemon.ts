@@ -1,19 +1,11 @@
-import { Pokemon, PokemonType } from '../../domain/entities/pokemon.js';
+import { CreatePokemonDTO } from '../dtos/pokemon-dto.js';
+import { Pokemon } from '../../domain/entities/pokemon.js';
 import { IPokemonRepository } from '../../domain/repositories/pokemon-repository.js';
-
-interface CreatePokemonInput {
-  id: string;
-  name: string;
-  type: PokemonType;
-  hp: number;
-  attack: number;
-  defense: number;
-}
 
 export class CreatePokemonUseCase {
   constructor(private pokemonRepository: IPokemonRepository) {}
 
-  async execute(input: CreatePokemonInput): Promise<Pokemon> {
+  async execute(input: CreatePokemonDTO): Promise<Pokemon> {
     const pokemonAlreadyExists = await this.pokemonRepository.findById(
       input.id,
     );
@@ -22,14 +14,7 @@ export class CreatePokemonUseCase {
       throw new Error('Pokémon já cadastrado.');
     }
 
-    const pokemon = new Pokemon({
-      id: input.id,
-      name: input.name,
-      type: input.type,
-      hp: input.hp,
-      attack: input.attack,
-      defense: input.defense,
-    });
+    const pokemon = new Pokemon(input);
 
     await this.pokemonRepository.create(pokemon);
 

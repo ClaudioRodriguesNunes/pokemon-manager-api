@@ -1,10 +1,11 @@
+import { CreatePokemonUseCase } from '../../application/use-cases/create-pokemon.js';
+import { DeletePokemonUseCase } from '../../application/use-cases/delete-pokemon.js';
+import { GetPokemonByIdUseCase } from '../../application/use-cases/get-pokemon-by-id.js';
+import { GetPokemonStatsUseCase } from '../../application/use-cases/get-pokemon-stats.js';
 import { ListPokemonsUseCase } from '../../application/use-cases/list-pokemons.js';
+import { UpdatePokemonUseCase } from '../../application/use-cases/update-pokemon.js';
 import { InMemoryPokemonRepository } from '../../infrastructure/database/in-memory/in-memory-pokemon-repository.js';
 import { PokemonController } from '../../infrastructure/http/controllers/pokemon-controller.js';
-import { GetPokemonByIdUseCase } from '../../application/use-cases/get-pokemon-by-id.js';
-import { CreatePokemonUseCase } from '../../application/use-cases/create-pokemon.js';
-import { UpdatePokemonUseCase } from '../../application/use-cases/update-pokemon.js';
-import { DeletePokemonUseCase } from '../../application/use-cases/delete-pokemon.js';
 
 const pokemonRepository = new InMemoryPokemonRepository();
 
@@ -19,11 +20,14 @@ export function makePokemonController(): PokemonController {
 
   const deletePokemonUseCase = new DeletePokemonUseCase(pokemonRepository);
 
+  const getPokemonStatsUseCase = new GetPokemonStatsUseCase(pokemonRepository);
+
   return new PokemonController(
     listPokemonsUseCase,
     getPokemonByIdUseCase,
     createPokemonUseCase,
     updatePokemonUseCase,
     deletePokemonUseCase,
+    getPokemonStatsUseCase,
   );
 }

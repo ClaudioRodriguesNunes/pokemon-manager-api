@@ -1,14 +1,10 @@
-import { Pokemon, PokemonType } from '../../domain/entities/pokemon.js';
+import { UpdatePokemonDTO } from '../dtos/pokemon-dto.js';
+import { Pokemon } from '../../domain/entities/pokemon.js';
 import { ResourceNotFoundError } from '../../domain/errors/resource-not-found-error.js';
 import { IPokemonRepository } from '../../domain/repositories/pokemon-repository.js';
 
-interface UpdatePokemonInput {
+interface UpdatePokemonInput extends UpdatePokemonDTO {
   id: string;
-  name: string;
-  type: PokemonType;
-  hp: number;
-  attack: number;
-  defense: number;
 }
 
 export class UpdatePokemonUseCase {
@@ -21,11 +17,13 @@ export class UpdatePokemonUseCase {
       throw new ResourceNotFoundError('Pokémon não encontrado no catálogo.');
     }
 
-    pokemon.name = input.name;
-    pokemon.type = input.type;
-    pokemon.hp = input.hp;
-    pokemon.attack = input.attack;
-    pokemon.defense = input.defense;
+    pokemon.update({
+      name: input.name,
+      type: input.type,
+      hp: input.hp,
+      attack: input.attack,
+      defense: input.defense,
+    });
 
     await this.pokemonRepository.update(pokemon);
 
