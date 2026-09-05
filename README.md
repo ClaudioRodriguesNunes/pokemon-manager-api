@@ -242,7 +242,7 @@ O `id` é `readonly`, pois identifica a entidade e não deve ser alterado após 
 
 A execução mostra uma atualização válida, uma tentativa inválida com HP negativo e, em seguida, a consulta confirmando que o estado válido anterior foi preservado.
 
-![Evidência 07 - Atualização e encapsulamento da entidade](img/evidencia-07-atualizacao-e-encapsulamento-da-entidade.png)
+![Evidência 07 - Atualização e encapsulamento da entidade](img/evidencia-07-Atualizacao-e-encapsulamento-da-entidade.png)
 
 ---
 
@@ -343,7 +343,7 @@ O Use Case não conhece `Request`, `Response`, `res.status()` ou qualquer outro 
 
 A aplicação foi iniciada com `tsx watch` e o servidor ficou disponível na porta `3333`.
 
-![Evidência 02 - Inicialização da API](img/evidencia-02-inicializacao-da-api.png)
+![Evidência 02 - Inicialização da API](img/evidencia-02-Inicializacao-da-API.png)
 
 ---
 
@@ -386,7 +386,7 @@ req.query.type
 
 A consulta com `?type=Fire` retornou apenas o Pokémon correspondente ao filtro, enquanto `/stats` refletiu a distribuição por tipo do catálogo.
 
-![Evidência 08 - Filtro por tipo e estatísticas](img/evidencia-08-filtro-por-tipo-e-estatisticas-do-catalogo.png)
+![Evidência 08 - Filtro por tipo e estatísticas](img/evidencia-08-Filtro-por-tipo-e-estatisticas-do-catalogo.png)
 
 ---
 
@@ -449,7 +449,7 @@ hp = -78
 
 A bateria distinguiu os dois casos: `hp` como string foi rejeitado pela validação da entrada e `hp` negativo foi rejeitado pela regra da entidade.
 
-![Evidência 06 - Validação de entrada e regras de domínio](img/evidencia-06-validacao-de-entrada-e-regras-de-dominio.png)
+![Evidência 06 - Validação de entrada e regras de domínio](img/evidencia-06-Validação-de-entrada-e-regras-de-dominio.png)
 
 ---
 
@@ -479,7 +479,7 @@ GET /25 encontra Pikachu
 
 O Pokémon criado por `POST` permaneceu disponível para consultas posteriores durante a mesma execução do servidor.
 
-![Evidência 04 - Criação, consulta e persistência em memória](img/evidencia-04-criacao-consulta-e-persistencia-em-memoria.png)
+![Evidência 04 - Criação, consulta e persistência em memória](img/evidencia-04-Criacao-consulta-e-persistencia-em-memoria.png)
 
 Porém, os dados não são persistidos de forma permanente.
 
@@ -496,7 +496,7 @@ servidor reiniciado
 
 Após reiniciar a aplicação, a listagem voltou a ficar vazia, demonstrando que o armazenamento permanece apenas na memória do processo.
 
-![Evidência 11 - Comportamento do repositório In-Memory](img/evidencia-11-comportamento-do-repositorio-in-memory.png)
+![Evidência 11 - Comportamento do repositório In-Memory](img/evidencia-11-Comportamento-do-repositorio-In-Memory.png)
 
 ### Stateless não significa ausência de armazenamento
 
@@ -536,7 +536,7 @@ A rota `/stats` é registrada antes de `/:id` para que a palavra `stats` não se
 
 Com o catálogo vazio, a listagem retornou `[]` e `/stats` retornou total igual a zero.
 
-![Evidência 03 - Estado inicial e endpoint de estatísticas](img/evidencia-03-estado-inicial-e-endpoint-de-estatisticas.png)
+![Evidência 03 - Estado inicial e endpoint de estatísticas](img/evidencia-03-Estado-inicial-e-endpoint-de-estatísticas.png)
 
 ### Regra de ID único
 
@@ -546,7 +546,7 @@ O `CreatePokemonUseCase` verifica se o identificador já existe antes de cadastr
 
 Uma segunda tentativa de cadastrar o mesmo ID retornou `400 Bad Request`, e o total do catálogo permaneceu inalterado.
 
-![Evidência 05 - Rejeição de Pokémon duplicado](img/evidencia-05-rejeicao-de-pokemon-duplicado.png)
+![Evidência 05 - Rejeição de Pokémon duplicado](img/evidencia-05-Rejeicao-de-Pokemon-duplicado.png)
 
 ### Recurso inexistente e `404`
 
@@ -556,7 +556,7 @@ Quando um Pokémon não existe, os Use Cases lançam `ResourceNotFoundError` e o
 
 GET, PUT e DELETE para um ID inexistente retornaram `404 Not Found`.
 
-![Evidência 09 - Tratamento de recurso inexistente](img/evidencia-09-tratamento-de-recurso-inexistente-404.png)
+![Evidência 09 - Tratamento de recurso inexistente](img/evidencia-09-Tratamento-de-recurso-inexistente-(404).png)
 
 ### Exclusão e `204 No Content`
 
@@ -564,7 +564,7 @@ O DELETE de um Pokémon existente retorna `204 No Content`. A consulta posterior
 
 ### Evidência 10 — Exclusão e atualização do catálogo
 
-![Evidência 10 - Exclusão e atualização do catálogo](img/evidencia-10-exclusao-e-atualizacao-do-catalogo.png)
+![Evidência 10 - Exclusão e atualização do catálogo](img/evidencia-10-Exclusao-e-atualizacao-do-catalogo.png)
 
 ---
 
@@ -644,7 +644,7 @@ npm run build
 
 O estado final do código passou pelo ESLint e pela compilação TypeScript sem erros.
 
-![Evidência 01 - Lint e Build](img/evidencia-01-lint-e-build.png)
+![Evidência 01 - Lint e Build](img/evidencia-01-Lint-e-Build.png)
 
 Inicie o servidor de desenvolvimento:
 
