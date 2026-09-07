@@ -9,24 +9,11 @@ Projeto desenvolvido para a disciplina **Tópicos Especiais em Engenharia de Sof
 
 A primeira entrega consolida uma API REST para gerenciamento de um catálogo de Pokémon utilizando **TypeScript**, **Express**, **Clean Architecture**, repositório **In-Memory** e documentação interativa com **OpenAPI 3.0 / Swagger UI**.
 
-O objetivo desta etapa não é antecipar tecnologias das próximas entregas, mas demonstrar de forma clara:
-
-- organização em camadas e separação de responsabilidades;
-- uso de contratos por interfaces e inversão de dependência;
-- entidade de domínio com regras próprias;
-- casos de uso independentes de HTTP;
-- Controller e Routes como adaptação para a Web;
-- contrato REST com verbos, params, query strings, body JSON e códigos HTTP;
-- armazenamento em memória durante a execução da aplicação;
-- tipagem TypeScript e validação básica em runtime;
-- documentação do contrato com OpenAPI 3.0;
-- interface interativa em `/api/docs` com execução real dos endpoints pelo Swagger UI.
-
 ---
 
 ## 1. Evolução do projeto nas Aulas 1 a 5
 
-O código atual é resultado da evolução do mesmo projeto. Algumas implementações intermediárias foram transformadas ou substituídas à medida que novos conceitos passaram a organizar melhor a aplicação.
+O código atual é resultado da evolução dos meus estudos no passar das aulas.  É importante informar que algumas implementações intermediárias foram ajustadas ou substituídas à media que novos conceitos foram apresentandas pelo professor em aula ou em seu material didático.
 
 ### Aula 1 — Preparação do projeto e arquitetura
 
@@ -779,51 +766,7 @@ http://localhost:3333/api/docs
 
 ---
 
-## 16. Bateria manual e revalidação pela Aula 5
-
-A bateria original foi executada pelo terminal. Depois da inclusão do Swagger/OpenAPI, os mesmos cenários foram reexecutados pelo Swagger UI sempre que tecnicamente aplicável.
-
-Isso funciona como uma regressão manual: a nova funcionalidade de documentação foi adicionada e o comportamento anterior foi conferido novamente.
-
-| Evidência | Cenário | Validação original | Revalidação Swagger |
-|---:|---|---|---|
-| 01 | Lint e Build | aprovado | geração OpenAPI + lint + build aprovados |
-| 02 | Inicialização da API | aprovado | `/api/docs` disponível |
-| 03 | Estado inicial e `/stats` vazio | aprovado | aprovado, sem nova captura |
-| 04 | Criação, consulta e estado em memória | aprovado | aprovado |
-| 05 | Rejeição de ID duplicado | aprovado | `400` e catálogo inalterado |
-| 06 | Validação de entrada e domínio | aprovado | `400` revalidado |
-| 07 | Atualização e encapsulamento | aprovado após correção | estado anterior preservado |
-| 08 | Filtro por tipo e estatísticas | aprovado | query `type` e `/stats` revalidados |
-| 09 | GET, PUT e DELETE de inexistente | `404` esperado | `404` revalidado |
-| 10 | Exclusão e atualização do catálogo | aprovado | `204`, `404` posterior e stats coerentes |
-| 11 | Reinício do servidor In-Memory | comportamento esperado | catálogo voltou a `[]` |
-
-### Uma falha encontrada durante a bateria original
-
-A primeira versão do método `Pokemon.update()` alterava propriedades antes de terminar todas as validações. Quando um valor posterior era inválido, a operação lançava erro, mas parte da entidade já havia sido modificada.
-
-O teste manual identificou esse comportamento. A implementação foi corrigida para:
-
-1. validar todos os novos valores;
-2. somente depois modificar o estado da entidade.
-
-A revalidação pelo Swagger confirmou novamente esse comportamento.
-
-```text
-lint/build/swagger
-→ verificam geração, qualidade estática e compilação
-
-bateria funcional
-→ verifica comportamento real da aplicação
-
-revalidação Swagger
-→ verifica o mesmo contrato por outro cliente HTTP
-```
-
----
-
-## 17. Conclusão da Entrega 1
+## 16. Conclusão da Entrega 1
 
 A evolução até a Aula 5 consolidou quatro resultados principais:
 
