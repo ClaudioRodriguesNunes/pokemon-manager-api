@@ -1,6 +1,7 @@
 import express from 'express';
 
 import { createPokemonRoutes } from '../infrastructure/http/routes/pokemon-routes.js';
+import { setupSwagger } from './config/swagger.js';
 import { makePokemonController } from './factories/make-pokemon-controller.js';
 
 const app = express();
@@ -14,6 +15,8 @@ app.use((req, res, next) => {
 
   next();
 });
+
+setupSwagger(app);
 
 const pokemonController = makePokemonController();
 const pokemonRoutes = createPokemonRoutes(pokemonController);

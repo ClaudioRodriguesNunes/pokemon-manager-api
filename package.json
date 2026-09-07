@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "tsx watch src/main/server.ts",
-    "build": "tsc",
+    "swagger": "tsx src/main/config/swagger-generator.ts",
+    "dev": "npm run swagger && tsx watch src/main/server.ts",
+    "build": "npm run swagger && tsc",
     "lint": "eslint src --ext .ts"
   },
   "keywords": [],
