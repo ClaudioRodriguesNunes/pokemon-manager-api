@@ -1,32 +1,32 @@
 # PokéManager API
 
-Projeto desenvolvido para a disciplina **Tópicos Especiais em Engenharia de Software**, com foco na evolução prática dos conteúdos estudados ao longo das Aulas 1 a 4.
+Projeto desenvolvido para a disciplina **Tópicos Especiais em Engenharia de Software**, com foco na evolução prática dos conteúdos estudados ao longo das Aulas 1 a 5.
 
 **Aluno:** Claudio R Nunes  
 **Curso:** Ciências da Computação
 
-## Entrega 1 — Arquitetura e Contrato REST
+## Entrega 1 — Arquitetura, Contrato REST e Documentação Interativa
 
-A primeira entrega consolida uma API REST para gerenciamento de um catálogo de Pokémon utilizando **TypeScript**, **Express**, **Clean Architecture** e um repositório **In-Memory**.
+A primeira entrega consolida uma API REST para gerenciamento de um catálogo de Pokémon utilizando **TypeScript**, **Express**, **Clean Architecture**, repositório **In-Memory** e documentação interativa com **OpenAPI 3.0 / Swagger UI**.
 
 O objetivo desta etapa não é antecipar tecnologias das próximas entregas, mas demonstrar de forma clara:
 
-- organização em camadas;
-- separação de responsabilidades;
-- uso de contratos por interfaces;
-- inversão de dependência;
+- organização em camadas e separação de responsabilidades;
+- uso de contratos por interfaces e inversão de dependência;
 - entidade de domínio com regras próprias;
 - casos de uso independentes de HTTP;
 - Controller e Routes como adaptação para a Web;
-- contrato REST com verbos, parâmetros, query strings, body JSON e códigos HTTP;
+- contrato REST com verbos, params, query strings, body JSON e códigos HTTP;
 - armazenamento em memória durante a execução da aplicação;
-- tipagem TypeScript e validação básica em runtime.
+- tipagem TypeScript e validação básica em runtime;
+- documentação do contrato com OpenAPI 3.0;
+- interface interativa em `/api/docs` com execução real dos endpoints pelo Swagger UI.
 
 ---
 
-## 1. Evolução do projeto nas Aulas 1 a 4
+## 1. Evolução do projeto nas Aulas 1 a 5
 
-O código atual é resultado da evolução do mesmo projeto. Alguns exercícios intermediários foram transformados ou substituídos quando conceitos posteriores passaram a organizar melhor a aplicação.
+O código atual é resultado da evolução do mesmo projeto. Algumas implementações intermediárias foram transformadas ou substituídas à medida que novos conceitos passaram a organizar melhor a aplicação.
 
 ### Aula 1 — Preparação do projeto e arquitetura
 
@@ -39,26 +39,15 @@ A primeira aula estabeleceu a base do projeto:
 - estrutura inicial inspirada em Clean Architecture;
 - separação entre `domain`, `application`, `infrastructure` e `main`.
 
-A partir desta aula, o projeto deixou de ser apenas um conjunto de funções e passou a ter uma organização explícita de responsabilidades.
-
 ### Aula 2 — TypeScript, tipos e contratos
 
 A segunda aula aprofundou recursos do TypeScript e a diferença entre JavaScript executado em runtime e os tipos verificados durante o desenvolvimento/compilação.
 
-Entre os conceitos exercitados estavam:
-
-- `interface`;
-- `enum`;
-- Union Types;
-- tipagem de parâmetros e corpo de requisição;
-- contratos de repositório;
-- implementação simulada/In-Memory.
-
-Durante essa etapa foram usados modelos intermediários, como `Rarity`, `nickname` e um DTO de Trainer. Eles cumpriram finalidade pedagógica, mas não permaneceram no código final porque o modelo da Aula 4 evoluiu para os atributos atualmente utilizados pela entidade `Pokemon`.
+Foram trabalhados `interface`, `enum`, Union Types, DTOs e contratos de repositório. Modelos intermediários, como `Rarity`, `nickname` e DTO de Trainer, tiveram finalidade pedagógica e não participam do fluxo principal atual do CRUD de Pokémon.
 
 ### Aula 3 — HTTP, REST e Express
 
-A terceira aula introduziu a camada Web:
+A terceira aula introduziu:
 
 - requisição e resposta HTTP;
 - aplicação stateless;
@@ -66,29 +55,51 @@ A terceira aula introduziu a camada Web:
 - Express;
 - verbos `GET`, `POST`, `PUT` e `DELETE`;
 - códigos HTTP;
-- parâmetros de rota;
+- route params;
 - query strings;
 - endpoint de estatísticas.
 
-O endpoint `/stats`, criado nesta etapa, foi preservado e posteriormente migrado para a arquitetura da Aula 4.
+O endpoint `/stats`, criado nessa etapa, foi preservado e migrado para a arquitetura consolidada na Aula 4.
 
 ### Aula 4 — Clean Architecture aplicada ao CRUD
 
-A quarta aula consolidou a arquitetura atual:
+A quarta aula consolidou:
 
 - entidade `Pokemon` no domínio;
 - `IPokemonRepository` como contrato;
 - `InMemoryPokemonRepository` como implementação concreta;
 - Use Cases para as operações da aplicação;
 - `PokemonController` para traduzir HTTP para casos de uso;
-- Routes responsáveis pelo mapeamento de endpoints;
+- Routes responsáveis pelo mapeamento dos endpoints;
 - `main` como ponto de composição das dependências.
 
-O CRUD final passou a ser executado sem que os casos de uso conheçam Express ou a implementação concreta do armazenamento.
+O CRUD passou a funcionar sem que os casos de uso conheçam Express ou a implementação concreta do armazenamento.
+
+### Aula 5 — OpenAPI 3.0, Swagger UI e documentação interativa
+
+A quinta aula acrescentou documentação executável ao contrato REST já existente.
+
+```text
+Routes + anotações #swagger.*
+            ↓
+      swagger-autogen
+            ↓
+    swagger-output.json
+            ↓
+       Swagger UI
+            ↓
+        /api/docs
+            ↓
+        Try it out
+            ↓
+       mesma API REST
+```
+
+A Aula 5 não criou uma segunda API e não substituiu o CRUD anterior. O Swagger UI passou a funcionar como **outro cliente HTTP**, permitindo visualizar e executar o mesmo contrato já testado anteriormente pelo terminal.
 
 ---
 
-## 2. Estrutura do projeto
+## 2. Estrutura principal do projeto
 
 ```text
 src/
@@ -122,12 +133,16 @@ src/
 │           └── pokemon-routes.ts
 │
 └── main/
+    ├── config/
+    │   ├── swagger-generator.ts
+    │   ├── swagger-output.json
+    │   └── swagger.ts
     ├── factories/
     │   └── make-pokemon-controller.ts
     └── server.ts
 ```
 
-A dependência entre as partes pode ser resumida assim:
+Fluxo principal da aplicação:
 
 ```text
 Cliente HTTP
@@ -143,56 +158,42 @@ IPokemonRepository
 InMemoryPokemonRepository
 ```
 
-O `main` funciona como ponto de composição: cria o Controller por meio da factory e entrega essa dependência às rotas.
-
-```text
-main/server.ts
-    ├── makePokemonController()
-    └── createPokemonRoutes(controller)
-```
-
-Dessa forma, `infrastructure/http/routes` não precisa importar `main`.
+O `main` funciona como ponto de composição: cria o Controller por meio da factory, registra as rotas e configura o Swagger UI.
 
 ---
 
-## 3. Conceitos de Orientação a Objetos usados no projeto
+## 3. Classe, interface, entidade e instância
 
-### Classe, interface, entidade e instância
-
-Esses termos aparecem juntos no projeto, mas representam coisas diferentes.
-
-#### Interface
+### Interface
 
 Uma interface descreve uma estrutura ou contrato.
 
 ```ts
-export interface PokemonProps {
-  id: string;
-  name: string;
-  type: PokemonType;
-  hp: number;
-  attack: number;
-  defense: number;
+export interface IPokemonRepository {
+  findAll(): Promise<Pokemon[]>;
+  findByType(type: string): Promise<Pokemon[]>;
+  findById(id: string): Promise<Pokemon | null>;
+  create(pokemon: Pokemon): Promise<void>;
+  update(pokemon: Pokemon): Promise<void>;
+  delete(id: string): Promise<void>;
 }
 ```
 
-Já `IPokemonRepository` descreve quais operações qualquer repositório de Pokémon deve oferecer.
-
-#### Classe
+### Classe
 
 `Pokemon` é uma classe porque contém atributos, construtor, métodos e regras de implementação.
 
-#### Entidade
+### Entidade
 
-`Pokemon` também representa uma entidade de domínio, pois corresponde a um conceito importante para a aplicação e possui identidade própria por meio de `id`.
+`Pokemon` também representa uma entidade de domínio porque corresponde a um conceito importante para a aplicação e possui identidade própria por meio de `id`.
 
-#### Instância
+### Instância
 
 ```ts
 const pokemon = new Pokemon(input);
 ```
 
-Nesse ponto é criada uma instância concreta da classe `Pokemon`.
+Nesse ponto é criada uma instância concreta da classe que representa a entidade `Pokemon`.
 
 ---
 
@@ -208,41 +209,31 @@ private _attack: number;
 private _defense: number;
 ```
 
-A leitura é feita por getters públicos, mas a alteração conjunta do estado ocorre pelo método `update()`.
+A leitura ocorre por getters públicos. A alteração conjunta do estado acontece pelo método `update()`.
 
-```ts
-pokemon.update({
-  name: input.name,
-  type: input.type,
-  hp: input.hp,
-  attack: input.attack,
-  defense: input.defense,
-});
-```
-
-Antes de modificar qualquer atributo, o método valida todos os novos valores. Isso evita uma atualização parcial da entidade.
+Antes de modificar qualquer atributo, o método valida todos os novos valores:
 
 ```text
 novos dados
     ↓
 valida todos os valores
     ↓
-┌───────────────┬───────────────┐
-│ algum inválido│ todos válidos │
-│ lança Error   │ altera estado │
-│ nada é alterado│ por completo │
-└───────────────┴───────────────┘
+┌────────────────┬────────────────┐
+│ algum inválido │ todos válidos  │
+│ lança Error    │ altera estado  │
+│ nada é alterado│ por completo   │
+└────────────────┴────────────────┘
 ```
 
-Essa decisão foi validada manualmente durante os testes: um `PUT` com HP inválido foi rejeitado e a entidade preservou integralmente o estado anterior.
+Essa decisão foi importante porque a bateria manual encontrou uma versão anterior que podia deixar atualização parcial quando uma validação falhava.
 
-O `id` é `readonly`, pois identifica a entidade e não deve ser alterado após sua criação.
+### Evidência 07 — Atualização e encapsulamento
 
-### Evidência 07 — Atualização e encapsulamento da entidade
+A validação inicial mostrou um `PUT` válido, um `PUT` inválido e a consulta posterior confirmando que o último estado válido foi preservado. Na Aula 5, o mesmo comportamento foi revalidado pelo Swagger UI.
 
-A execução mostra uma atualização válida, uma tentativa inválida com HP negativo e, em seguida, a consulta confirmando que o estado válido anterior foi preservado.
-
-![Evidência 07 - Atualização e encapsulamento da entidade](img/evidencia-07-Atualizacao-e-encapsulamento-da-entidade.png)
+| Validação inicial | Revalidação pela Aula 5 |
+|---|---|
+| ![Evidência 07 - Atualização e encapsulamento](<img/evidencia-07-Atualizacao-e-encapsulamento-da-entidade.png>) | ![Evidência 07 - Swagger](<img/evidencia-07-Atualizacao-e-encapsulamento-da-entidade-swagger.png>) |
 
 ---
 
@@ -269,11 +260,7 @@ export class InMemoryPokemonRepository implements IPokemonRepository {
 }
 ```
 
-Os Use Cases recebem a interface, e não a classe concreta:
-
-```ts
-constructor(private pokemonRepository: IPokemonRepository) {}
-```
+Os Use Cases dependem da interface, e não da implementação concreta:
 
 ```text
 Use Case
@@ -284,8 +271,6 @@ InMemoryPokemonRepository
 ```
 
 O caso de uso sabe **o que** um repositório precisa fazer, mas não precisa saber **como** os dados são armazenados.
-
-Esse é o principal exemplo de inversão de dependência utilizado nesta entrega.
 
 ---
 
@@ -298,30 +283,34 @@ Esse é o principal exemplo de inversão de dependência utilizado nesta entrega
 | `IPokemonRepository` | definir o contrato de armazenamento |
 | `InMemoryPokemonRepository` | armazenar e recuperar dados em memória |
 | `PokemonController` | traduzir requisição HTTP para Use Case e resultado para resposta HTTP |
-| Routes | associar verbo + endpoint ao método do Controller |
+| Routes | associar verbo + endpoint ao método do Controller e registrar metadados do Swagger |
 | Main / Factory | criar e conectar as dependências |
+| Swagger config | gerar e disponibilizar a documentação OpenAPI |
 
-Uma forma prática de identificar responsabilidade é perguntar:
+Uma pergunta prática ajuda a identificar responsabilidades:
 
 > Se esta regra mudar, qual parte deveria precisar mudar?
 
-Por exemplo, trocar o mecanismo de armazenamento não deveria exigir reescrever os Use Cases.
+Exemplos:
+
+- regra de HP → `Pokemon`;
+- forma de armazenamento → repositório concreto;
+- URL → Routes;
+- tradução para HTTP → Controller;
+- descrição do contrato → anotações Swagger/configuração OpenAPI.
 
 ---
 
 ## 7. Controller, Routes e Express
 
-O Express é responsável por receber e responder requisições HTTP.
-
-No `server.ts`:
+O Express recebe e responde requisições HTTP.
 
 ```ts
 const app = express();
-
 app.use(express.json());
 ```
 
-`express.json()` interpreta o corpo JSON recebido e o disponibiliza em `req.body`.
+`express.json()` interpreta o JSON recebido e disponibiliza o conteúdo em `req.body`.
 
 ```text
 Cliente
@@ -337,13 +326,19 @@ Use Case
 Repository
 ```
 
-O Use Case não conhece `Request`, `Response`, `res.status()` ou qualquer outro recurso do Express. Essa tradução pertence ao Controller.
+O Use Case não conhece `Request`, `Response`, `res.status()` ou qualquer outro recurso do Express. A tradução para HTTP pertence ao Controller.
 
 ### Evidência 02 — Inicialização da API
 
-A aplicação foi iniciada com `tsx watch` e o servidor ficou disponível na porta `3333`.
+A aplicação foi iniciada com `tsx watch` e ficou disponível na porta `3333`.
 
-![Evidência 02 - Inicialização da API](img/evidencia-02-Inicializacao-da-API.png)
+![Evidência 02 - Inicialização da API](<img/evidencia-02-Inicializacao-da-API.png>)
+
+Na Aula 5, o servidor passou a disponibilizar também:
+
+```text
+http://localhost:3333/api/docs
+```
 
 ---
 
@@ -382,17 +377,28 @@ req.query.type
 }
 ```
 
+O `PUT` combina as duas formas:
+
+```text
+PUT /api/v1/pokemons/25
+                      ↑ params
+
++ JSON no body
+```
+
 ### Evidência 08 — Filtro por tipo e estatísticas
 
-A consulta com `?type=Fire` retornou apenas o Pokémon correspondente ao filtro, enquanto `/stats` refletiu a distribuição por tipo do catálogo.
+A consulta `?type=Fire` retornou apenas o Pokémon correspondente ao filtro. O endpoint `/stats` refletiu a distribuição por tipo. Na Aula 5, o campo `type` passou a aparecer como parâmetro de consulta diretamente no Swagger UI.
 
-![Evidência 08 - Filtro por tipo e estatísticas](img/evidencia-08-Filtro-por-tipo-e-estatisticas-do-catalogo.png)
+| Validação inicial | Revalidação pela Aula 5 |
+|---|---|
+| ![Evidência 08 - Filtro e estatísticas](<img/evidencia-08-Filtro-por-tipo-e-estatisticas-do-catalogo.png>) | ![Evidência 08 - Swagger](<img/evidencia-08-Filtro-por-tipo-e-estatisticas-do-catalogo-swagger.png>) |
 
 ---
 
 ## 9. TypeScript e validação em runtime
 
-Os DTOs documentam e tipam o formato esperado pelo código TypeScript:
+Os DTOs tipam o formato esperado pelo código TypeScript:
 
 ```ts
 export interface CreatePokemonDTO {
@@ -407,24 +413,6 @@ export interface CreatePokemonDTO {
 
 Essa tipagem ajuda o programador e o compilador, mas não impede um cliente HTTP de enviar dados incorretos.
 
-### Validação básica da entrada HTTP
-
-O Controller verifica aspectos estruturais, por exemplo:
-
-- `id` e `name` como strings válidas;
-- `type` como string recebida;
-- `hp`, `attack` e `defense` como números.
-
-### Regras da entidade
-
-A entidade verifica:
-
-- nome não vazio;
-- tipo pertencente ao `PokemonType`;
-- HP maior que zero;
-- ataque maior que zero;
-- defesa maior que zero.
-
 ```text
 Controller
 "A entrada possui a estrutura básica esperada?"
@@ -435,6 +423,8 @@ Use Case
 Pokemon
 "O estado da entidade é válido?"
 ```
+
+Exemplo:
 
 ```text
 hp = "78"
@@ -447,9 +437,11 @@ hp = -78
 
 ### Evidência 06 — Validação de entrada e regras de domínio
 
-A bateria distinguiu os dois casos: `hp` como string foi rejeitado pela validação da entrada e `hp` negativo foi rejeitado pela regra da entidade.
+Na Aula 5 foi registrada uma resposta representativa pelo Swagger mostrando a rejeição de `hp` com tipo incorreto. O caso de HP negativo também foi reexecutado, mas não ganhou uma segunda captura para evitar repetição visual.
 
-![Evidência 06 - Validação de entrada e regras de domínio](img/evidencia-06-Validação-de-entrada-e-regras-de-dominio.png)
+| Validação inicial | Revalidação pela Aula 5 |
+|---|---|
+| ![Evidência 06 - Validação](<img/evidencia-06-Validação-de-entrada-e-regras-de-dominio.png>) | ![Evidência 06 - Swagger](<img/evidencia-06-Validação-de-entrada-e-regras-de-dominio-swagger.png>) |
 
 ---
 
@@ -477,11 +469,13 @@ GET /25 encontra Pikachu
 
 ### Evidência 04 — Criação, consulta e estado compartilhado em memória
 
-O Pokémon criado por `POST` permaneceu disponível para consultas posteriores durante a mesma execução do servidor.
+A bateria inicial cadastrou o Pikachu e confirmou que ele permaneceu disponível durante a mesma execução do servidor. Na Aula 5, o mesmo fluxo foi executado pelo `Try it out` do Swagger UI.
 
-![Evidência 04 - Criação, consulta e persistência em memória](img/evidencia-04-Criacao-consulta-e-persistencia-em-memoria.png)
+| Validação inicial | Revalidação pela Aula 5 |
+|---|---|
+| ![Evidência 04 - Criação e consulta](<img/evidencia-04-Criacao-consulta-e-persistencia-em-memoria.png>) | ![Evidência 04 - Swagger](<img/evidencia-04-Criacao-consulta-e-persistencia-em-memoria-swagger.png>) |
 
-Porém, os dados não são persistidos de forma permanente.
+Os dados, porém, não são persistidos permanentemente:
 
 ```text
 processo ativo
@@ -494,13 +488,15 @@ servidor reiniciado
 
 ### Evidência 11 — Comportamento do repositório In-Memory
 
-Após reiniciar a aplicação, a listagem voltou a ficar vazia, demonstrando que o armazenamento permanece apenas na memória do processo.
+A listagem foi consultada antes do reinício do servidor e novamente após o reinício. A segunda consulta retornou `[]`, confirmando que o armazenamento existe somente na memória do processo.
 
-![Evidência 11 - Comportamento do repositório In-Memory](img/evidencia-11-Comportamento-do-repositorio-In-Memory.png)
+| Validação inicial | Revalidação pela Aula 5 |
+|---|---|
+| ![Evidência 11 - In-Memory](<img/evidencia-11-Comportamento-do-repositorio-In-Memory.png>) | ![Evidência 11 - Swagger](<img/evidencia-11-Comportamento-do-repositorio-In-Memory-swagger.png>) |
 
 ### Stateless não significa ausência de armazenamento
 
-HTTP ser stateless significa que cada requisição deve conter as informações necessárias para ser compreendida. Isso não impede que o servidor mantenha dados.
+HTTP stateless significa que cada requisição deve conter as informações necessárias para ser compreendida. Isso não impede que o servidor mantenha dados.
 
 ```text
 HTTP stateless
@@ -528,51 +524,131 @@ http://localhost:3333/api/v1/pokemons
 | `PUT` | `/api/v1/pokemons/:id` | atualizar | `200` | `400`, `404`, `500` |
 | `DELETE` | `/api/v1/pokemons/:id` | excluir | `204` | `404`, `500` |
 
-### Estado inicial e endpoint `/stats`
+### Evidência 03 — Estado inicial e `/stats`
 
-A rota `/stats` é registrada antes de `/:id` para que a palavra `stats` não seja interpretada pelo Express como um identificador de Pokémon.
+Com o catálogo vazio, a listagem retornou `[]` e `/stats` retornou total igual a zero. O mesmo cenário foi reexecutado pelo Swagger UI na Aula 5, sem necessidade de uma nova captura específica.
 
-### Evidência 03 — Estado inicial e endpoint de estatísticas
-
-Com o catálogo vazio, a listagem retornou `[]` e `/stats` retornou total igual a zero.
-
-![Evidência 03 - Estado inicial e endpoint de estatísticas](img/evidencia-03-Estado-inicial-e-endpoint-de-estatísticas.png)
-
-### Regra de ID único
-
-O `CreatePokemonUseCase` verifica se o identificador já existe antes de cadastrar uma nova entidade.
+![Evidência 03 - Estado inicial e estatísticas](<img/evidencia-03-Estado-inicial-e-endpoint-de-estatísticas.png>)
 
 ### Evidência 05 — Rejeição de Pokémon duplicado
 
-Uma segunda tentativa de cadastrar o mesmo ID retornou `400 Bad Request`, e o total do catálogo permaneceu inalterado.
+Uma segunda tentativa de cadastrar o mesmo ID retornou `400 Bad Request`, e o total do catálogo permaneceu inalterado. O comportamento foi revalidado pelo Swagger UI.
 
-![Evidência 05 - Rejeição de Pokémon duplicado](img/evidencia-05-Rejeicao-de-Pokemon-duplicado.png)
+| Validação inicial | Revalidação pela Aula 5 |
+|---|---|
+| ![Evidência 05 - Duplicidade](<img/evidencia-05-Rejeicao-de-Pokemon-duplicado.png>) | ![Evidência 05 - Swagger](<img/evidencia-05-Rejeicao-de-Pokemon-duplicado-swagger.png>) |
 
-### Recurso inexistente e `404`
+### Evidência 09 — Recurso inexistente e `404`
 
-Quando um Pokémon não existe, os Use Cases lançam `ResourceNotFoundError` e o Controller traduz essa condição para HTTP `404`.
+GET, PUT e DELETE para um ID inexistente retornaram `404 Not Found`. Na revalidação da Aula 5, o Swagger confirmou a mesma tradução de `ResourceNotFoundError` para HTTP `404`.
 
-### Evidência 09 — Tratamento de recurso inexistente
-
-GET, PUT e DELETE para um ID inexistente retornaram `404 Not Found`.
-
-![Evidência 09 - Tratamento de recurso inexistente](img/evidencia-09-Tratamento-de-recurso-inexistente-(404).png)
-
-### Exclusão e `204 No Content`
-
-O DELETE de um Pokémon existente retorna `204 No Content`. A consulta posterior retorna `404`, e `/stats` reflete a remoção.
+| Validação inicial | Revalidação pela Aula 5 |
+|---|---|
+| ![Evidência 09 - 404](<img/evidencia-09-Tratamento-de-recurso-inexistente-(404).png>) | ![Evidência 09 - Swagger](<img/evidencia-09-Tratamento-de-recurso-inexistente-(404)-swagger.png>) |
 
 ### Evidência 10 — Exclusão e atualização do catálogo
 
-![Evidência 10 - Exclusão e atualização do catálogo](img/evidencia-10-Exclusao-e-atualizacao-do-catalogo.png)
+O DELETE de um Pokémon existente retornou `204 No Content`. A consulta posterior retornou `404`, e `/stats` passou a refletir a remoção.
+
+| Validação inicial | Revalidação pela Aula 5 |
+|---|---|
+| ![Evidência 10 - Exclusão](<img/evidencia-10-Exclusao-e-atualizacao-do-catalogo.png>) | ![Evidência 10 - Swagger](<img/evidencia-10-Exclusao-e-atualizacao-do-catalogo-swagger.png>) |
 
 ---
 
-## 12. Exemplos de uso
+## 12. OpenAPI 3.0, Swagger UI e swagger-autogen
 
-Os exemplos abaixo usam PowerShell com `curl.exe`.
+Os três nomes estão relacionados, mas não significam a mesma coisa.
 
-### Listar Pokémon
+| Elemento | Papel no projeto |
+|---|---|
+| **OpenAPI 3.0** | especificação que descreve o contrato da API |
+| **swagger-autogen** | analisa rotas e comentários e gera o arquivo OpenAPI |
+| **Swagger UI** | apresenta o contrato em uma interface visual e permite executar requisições |
+
+### Arquivos adicionados na Aula 5
+
+```text
+src/main/config/
+├── swagger-generator.ts
+├── swagger-output.json
+└── swagger.ts
+```
+
+### `swagger-generator.ts`
+
+Define informações gerais, schemas reutilizáveis e os arquivos que devem ser analisados pelo `swagger-autogen`.
+
+No projeto, o endereço-base usado pelo contrato é:
+
+```text
+http://localhost:3333/api/v1/pokemons
+```
+
+As rotas do `Router` são relativas:
+
+```text
+/
+/stats
+/{id}
+```
+
+O OpenAPI combina o servidor-base com cada `path` para formar as URLs chamadas pelo Swagger UI.
+
+### Anotações `#swagger.*`
+
+As rotas foram enriquecidas com metadados como:
+
+```text
+#swagger.tags
+#swagger.summary
+#swagger.description
+#swagger.parameters
+#swagger.requestBody
+#swagger.responses
+```
+
+Esses comentários não executam regra de negócio. Eles descrevem o contrato para que a documentação deixe de ser apenas uma lista genérica de endpoints.
+
+### `swagger-output.json`
+
+É o arquivo OpenAPI gerado automaticamente.
+
+```text
+pokemon-routes.ts + swagger-generator.ts
+                ↓
+          npm run swagger
+                ↓
+        swagger-output.json
+```
+
+Esse JSON **não deve ser editado manualmente** no fluxo normal, porque será sobrescrito quando o gerador for executado novamente.
+
+### `swagger.ts`
+
+Lê o contrato gerado e registra o Swagger UI no Express:
+
+```text
+http://localhost:3333/api/docs
+```
+
+### Swagger UI como cliente
+
+```text
+PowerShell / curl.exe ─┐
+                      ├→ mesma API REST
+Swagger UI / Try it out┘
+```
+
+A reexecução das evidências confirmou que acrescentar a documentação interativa não alterou o comportamento funcional já validado nas Aulas anteriores.
+
+---
+
+## 13. Exemplos de uso pelo terminal
+
+O Swagger UI passou a oferecer uma segunda forma de executar o contrato, mas os comandos de terminal continuam válidos.
+
+### Listar
 
 ```powershell
 curl.exe -i http://localhost:3333/api/v1/pokemons
@@ -590,7 +666,7 @@ curl.exe -i http://localhost:3333/api/v1/pokemons/25
 curl.exe -i "http://localhost:3333/api/v1/pokemons?type=Electric"
 ```
 
-### Consultar estatísticas
+### Estatísticas
 
 ```powershell
 curl.exe -i http://localhost:3333/api/v1/pokemons/stats
@@ -620,12 +696,18 @@ curl.exe -i -X DELETE http://localhost:3333/api/v1/pokemons/25
 
 ---
 
-## 13. Como executar o projeto
+## 14. Como executar o projeto
 
 Instale as dependências:
 
 ```powershell
 npm install
+```
+
+Gere ou atualize a documentação OpenAPI:
+
+```powershell
+npm run swagger
 ```
 
 Execute a análise estática:
@@ -640,11 +722,11 @@ Compile o TypeScript:
 npm run build
 ```
 
-### Evidência 01 — Lint e Build
+### Evidência 01 — Swagger, Lint e Build
 
-O estado final do código passou pelo ESLint e pela compilação TypeScript sem erros.
+O estado final do código passou pela geração da documentação, pelo ESLint e pela compilação TypeScript sem erros.
 
-![Evidência 01 - Lint e Build](img/evidencia-01-Lint-e-Build.png)
+![Evidência 01 - Lint e Build](<img/evidencia-01-Lint-e-Build.png>)
 
 Inicie o servidor de desenvolvimento:
 
@@ -652,17 +734,33 @@ Inicie o servidor de desenvolvimento:
 npm run dev
 ```
 
-O projeto utiliza `tsx watch`, permitindo executar o código TypeScript durante o desenvolvimento e reiniciar o servidor automaticamente quando os arquivos são alterados.
-
-Servidor:
+No estado atual, `npm run dev` executa primeiro a geração do Swagger e depois inicia o servidor com `tsx watch`.
 
 ```text
-http://localhost:3333
+npm run dev
+     ↓
+npm run swagger
+     ↓
+swagger-output.json atualizado
+     ↓
+tsx watch src/main/server.ts
+```
+
+API:
+
+```text
+http://localhost:3333/api/v1/pokemons
+```
+
+Documentação interativa:
+
+```text
+http://localhost:3333/api/docs
 ```
 
 ---
 
-## 14. Ferramentas utilizadas nesta etapa
+## 15. Ferramentas utilizadas nesta etapa
 
 | Ferramenta | Papel no projeto |
 |---|---|
@@ -674,29 +772,34 @@ http://localhost:3333
 | Express | camada HTTP da API |
 | ESLint | análise de qualidade e regras de código |
 | Prettier | padronização de formatação |
+| OpenAPI 3.0 | especificação do contrato da API |
+| swagger-autogen | geração automatizada do arquivo OpenAPI |
+| Swagger UI | documentação visual e execução interativa dos endpoints |
 | Git / GitHub | versionamento e armazenamento do repositório |
 
 ---
 
-## 15. Bateria manual de testes
+## 16. Bateria manual e revalidação pela Aula 5
 
-Após a revisão técnica da Entrega 1, foi executada uma bateria manual cobrindo o contrato REST e comportamentos importantes da arquitetura.
+A bateria original foi executada pelo terminal. Depois da inclusão do Swagger/OpenAPI, os mesmos cenários foram reexecutados pelo Swagger UI sempre que tecnicamente aplicável.
 
-| Evidência | Cenário | Resultado |
-|---:|---|---|
-| 01 | Lint e Build | aprovado |
-| 02 | Inicialização da API | aprovado |
-| 03 | Estado inicial e `/stats` vazio | aprovado |
-| 04 | Criação, consulta e estado compartilhado em memória | aprovado |
-| 05 | Rejeição de ID duplicado | aprovado |
-| 06 | Validação de entrada e regras de domínio | aprovado |
-| 07 | Atualização e encapsulamento da entidade | aprovado após correção encontrada pelos testes |
-| 08 | Filtro por tipo e estatísticas | aprovado |
-| 09 | GET, PUT e DELETE de recurso inexistente | `404` conforme esperado |
-| 10 | Exclusão válida e atualização do catálogo | aprovado |
-| 11 | Perda dos dados após reinício do servidor In-Memory | comportamento esperado |
+Isso funciona como uma regressão manual: a nova funcionalidade de documentação foi adicionada e o comportamento anterior foi conferido novamente.
 
-### Uma falha encontrada durante a bateria
+| Evidência | Cenário | Validação original | Revalidação Swagger |
+|---:|---|---|---|
+| 01 | Lint e Build | aprovado | geração OpenAPI + lint + build aprovados |
+| 02 | Inicialização da API | aprovado | `/api/docs` disponível |
+| 03 | Estado inicial e `/stats` vazio | aprovado | aprovado, sem nova captura |
+| 04 | Criação, consulta e estado em memória | aprovado | aprovado |
+| 05 | Rejeição de ID duplicado | aprovado | `400` e catálogo inalterado |
+| 06 | Validação de entrada e domínio | aprovado | `400` revalidado |
+| 07 | Atualização e encapsulamento | aprovado após correção | estado anterior preservado |
+| 08 | Filtro por tipo e estatísticas | aprovado | query `type` e `/stats` revalidados |
+| 09 | GET, PUT e DELETE de inexistente | `404` esperado | `404` revalidado |
+| 10 | Exclusão e atualização do catálogo | aprovado | `204`, `404` posterior e stats coerentes |
+| 11 | Reinício do servidor In-Memory | comportamento esperado | catálogo voltou a `[]` |
+
+### Uma falha encontrada durante a bateria original
 
 A primeira versão do método `Pokemon.update()` alterava propriedades antes de terminar todas as validações. Quando um valor posterior era inválido, a operação lançava erro, mas parte da entidade já havia sido modificada.
 
@@ -705,24 +808,45 @@ O teste manual identificou esse comportamento. A implementação foi corrigida p
 1. validar todos os novos valores;
 2. somente depois modificar o estado da entidade.
 
-A bateria foi repetida e confirmou que uma atualização inválida não deixa alterações parciais.
+A revalidação pelo Swagger confirmou novamente esse comportamento.
 
 ```text
-lint/build
-→ verificam qualidade estática e compilação
+lint/build/swagger
+→ verificam geração, qualidade estática e compilação
 
 bateria funcional
 → verifica comportamento real da aplicação
+
+revalidação Swagger
+→ verifica o mesmo contrato por outro cliente HTTP
 ```
 
 ---
 
-## 16. Conclusão da Entrega 1
+## 17. Conclusão da Entrega 1
 
-A Entrega 1 consolidou três resultados principais:
+A evolução até a Aula 5 consolidou quatro resultados principais:
 
 - **arquitetura em camadas aplicada**, com Domain, Application, Infrastructure e Main exercendo responsabilidades distintas;
 - **contrato REST funcional**, incluindo CRUD, filtro por tipo, estatísticas e tratamento de erros;
-- **comportamento validado manualmente**, incluindo regras de domínio, encapsulamento, códigos HTTP e características do repositório In-Memory.
+- **comportamento validado manualmente**, incluindo regras de domínio, encapsulamento, códigos HTTP e características do repositório In-Memory;
+- **contrato documentado com OpenAPI 3.0 e Swagger UI**, permitindo visualizar e executar os mesmos endpoints em `/api/docs`.
 
-O projeto encerra esta etapa com uma base coerente com os conteúdos estudados nas Aulas 1 a 4 e preparada para evoluir nas próximas entregas sem antecipar tecnologias que ainda não pertencem ao escopo atual.
+A principal evolução da Aula 5 pode ser resumida assim:
+
+```text
+Aulas 1 a 4
+API implementada e testada
+        ↓
+Aula 5
+contrato descrito pelo OpenAPI
+        ↓
+Swagger UI
+contrato visível e executável
+        ↓
+reexecução dos mesmos cenários
+        ↓
+comportamento anterior preservado
+```
+
+O projeto encerra esta etapa com uma base coerente com os conteúdos estudados nas Aulas 1 a 5 e preparada para evoluir nas próximas entregas sem antecipar tecnologias que ainda não pertencem ao escopo atual.
