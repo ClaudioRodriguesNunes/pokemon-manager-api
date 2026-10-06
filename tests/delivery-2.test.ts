@@ -13,6 +13,8 @@ import { CreatePokemonProps } from '../src/domain/entities/pokemon.js';
 import { PokemonExternalGateway } from '../src/domain/gateways/pokemon-external-gateway.js';
 import { IPokemonRepository } from '../src/domain/repositories/pokemon-repository.js';
 import { ResourceNotFoundError } from '../src/domain/errors/resource-not-found-error.js';
+import { validateRequest } from '../src/infrastructure/http/validation/validate-request.js';
+import { PokemonController } from '../src/infrastructure/http/controllers/pokemon-controller.js';
 
 test('schemas accept the approved POST and PUT contract', () => {
   const input = {
@@ -47,6 +49,37 @@ test('schemas validate UUIDs, type filter and reject invalid values', () => {
     listPokemonsQuerySchema.safeParse({ type: 'Dragon' }).success,
     false,
   );
+});
+
+test('type=Electric keeps Express 5 query immutable and reaches list safely', async () => {
+  const middleware = validateRequest(listPokemonsQuerySchema, 'query');
+  const request = { query: { type: 'Electric' } } as never;
+  const response = {
+    locals: {},
+    status: () => response,
+    json: (value: unknown) => value,
+  } as never;
+  let nextError: unknown;
+
+  middleware(request, response, (error) => {
+    nextError = error;
+  });
+
+  assert.equal(nextError, undefined);
+  assert.deepEqual(response.locals.validated.query, { type: 'Electric' });
+
+  let receivedType: string | undefined;
+  const controller = new PokemonController(
+    { execute: async (input: { type?: string }) => { receivedType = input.type; return []; } } as never,
+    {} as never,
+    {} as never,
+    {} as never,
+    {} as never,
+    {} as never,
+  );
+
+  await controller.list(request, response);
+  assert.equal(receivedType, 'Electric');
 });
 
 test('Pokemon serializes generated and nullable external fields', () => {

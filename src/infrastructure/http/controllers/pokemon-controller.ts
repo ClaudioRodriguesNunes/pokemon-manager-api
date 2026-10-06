@@ -17,7 +17,10 @@ export class PokemonController {
   ) {}
 
   async list(req: Request, res: Response): Promise<Response> {
-    const type = req.query.type;
+    const validatedQuery = res.locals.validated?.query as
+      | { type?: string }
+      | undefined;
+    const type = validatedQuery?.type;
 
     const pokemons = await this.listPokemonsUseCase.execute({
       type: typeof type === 'string' ? type : undefined,
