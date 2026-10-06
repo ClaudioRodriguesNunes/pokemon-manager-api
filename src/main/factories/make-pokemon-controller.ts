@@ -6,15 +6,24 @@ import { ListPokemonsUseCase } from '../../application/use-cases/list-pokemons.j
 import { UpdatePokemonUseCase } from '../../application/use-cases/update-pokemon.js';
 import { PrismaPokemonRepository } from '../../infrastructure/database/prisma/prisma-pokemon-repository.js';
 import { PokemonController } from '../../infrastructure/http/controllers/pokemon-controller.js';
+import { InMemoryPokemonGateway } from '../../infrastructure/gateways/in-memory-pokemon-gateway.js';
+import { PokeApiAxiosGateway } from '../../infrastructure/gateways/poke-api-axios-gateway.js';
 
 const pokemonRepository = new PrismaPokemonRepository();
+const pokemonExternalGateway =
+  process.env.USE_EXTERNAL_API === 'false'
+    ? new InMemoryPokemonGateway()
+    : new PokeApiAxiosGateway();
 
 export function makePokemonController(): PokemonController {
   const listPokemonsUseCase = new ListPokemonsUseCase(pokemonRepository);
 
   const getPokemonByIdUseCase = new GetPokemonByIdUseCase(pokemonRepository);
 
-  const createPokemonUseCase = new CreatePokemonUseCase(pokemonRepository);
+  const createPokemonUseCase = new CreatePokemonUseCase(
+    pokemonRepository,
+    pokemonExternalGateway,
+  );
 
   const updatePokemonUseCase = new UpdatePokemonUseCase(pokemonRepository);
 

@@ -1,17 +1,9 @@
 import { ErrorRequestHandler } from 'express';
 import { z } from 'zod';
 import { AppError } from '../../../domain/errors/app-error.js';
-import {
-  isPrismaError,
-  mapPrismaError,
-} from './prisma-error-mapper.js';
+import { isPrismaError, mapPrismaError } from './prisma-error-mapper.js';
 
-export const errorHandler: ErrorRequestHandler = (
-  error,
-  _req,
-  res,
-  _next,
-) => {
+export const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {
   if (error instanceof z.ZodError) {
     return res.status(400).json({
       status: 'error',

@@ -13,8 +13,11 @@ export function createPokemonRoutes(
 ): Router {
   const pokemonRoutes = Router();
 
-  pokemonRoutes.get('/', validateRequest(listPokemonsQuerySchema, 'query'), (req, res) => {
-    /*
+  pokemonRoutes.get(
+    '/',
+    validateRequest(listPokemonsQuerySchema, 'query'),
+    (req, res) => {
+      /*
       #swagger.tags = ['Pokemons']
       #swagger.summary = 'Lista os Pokémons'
       #swagger.description = 'Retorna todos os Pokémons cadastrados. Pode receber o tipo como filtro pela query string.'
@@ -23,6 +26,7 @@ export function createPokemonRoutes(
         in: 'query',
         required: false,
         type: 'string',
+        enum: ['Fire', 'Water', 'Grass', 'Electric', 'Psychic'],
         example: 'Fire',
         description: 'Filtra os Pokémons pelo tipo.'
       }
@@ -39,8 +43,9 @@ export function createPokemonRoutes(
         }
       }
     */
-    return pokemonController.list(req, res);
-  });
+      return pokemonController.list(req, res);
+    },
+  );
 
   pokemonRoutes.get('/stats', (req, res) => {
     /*
@@ -60,8 +65,11 @@ export function createPokemonRoutes(
     return pokemonController.stats(req, res);
   });
 
-  pokemonRoutes.get('/:id', validateRequest(pokemonIdSchema, 'params'), (req, res) => {
-    /*
+  pokemonRoutes.get(
+    '/:id',
+    validateRequest(pokemonIdSchema, 'params'),
+    (req, res) => {
+      /*
       #swagger.tags = ['Pokemons']
       #swagger.summary = 'Busca um Pokémon por ID'
       #swagger.description = 'Retorna o Pokémon correspondente ao identificador informado.'
@@ -70,7 +78,8 @@ export function createPokemonRoutes(
         in: 'path',
         required: true,
         type: 'string',
-        example: '25',
+        format: 'uuid',
+        example: '550e8400-e29b-41d4-a716-446655440000',
         description: 'Identificador do Pokémon.'
       }
 
@@ -100,12 +109,17 @@ export function createPokemonRoutes(
           }
         }
       }
-    */
-    return pokemonController.getById(req, res);
-  });
 
-  pokemonRoutes.post('/', validateRequest(createPokemonSchema, 'body'), (req, res) => {
-    /*
+    */
+      return pokemonController.getById(req, res);
+    },
+  );
+
+  pokemonRoutes.post(
+    '/',
+    validateRequest(createPokemonSchema, 'body'),
+    (req, res) => {
+      /*
       #swagger.tags = ['Pokemons']
       #swagger.summary = 'Cadastra um Pokémon'
       #swagger.description = 'Cria um novo Pokémon no catálogo.'
@@ -156,16 +170,26 @@ export function createPokemonRoutes(
           }
         }
       }
+
+      #swagger.responses[503] = {
+        description: 'Serviço externo indisponível durante o cadastro.',
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/schemas/ErrorResponse' }
+          }
+        }
+      }
     */
-    return pokemonController.create(req, res);
-  });
+      return pokemonController.create(req, res);
+    },
+  );
 
   pokemonRoutes.put(
     '/:id',
     validateRequest(pokemonIdSchema, 'params'),
     validateRequest(updatePokemonSchema, 'body'),
     (req, res) => {
-    /*
+      /*
       #swagger.tags = ['Pokemons']
       #swagger.summary = 'Atualiza um Pokémon'
       #swagger.description = 'Atualiza os dados do Pokémon identificado pelo ID informado.'
@@ -174,7 +198,8 @@ export function createPokemonRoutes(
         in: 'path',
         required: true,
         type: 'string',
-        example: '25',
+        format: 'uuid',
+        example: '550e8400-e29b-41d4-a716-446655440000',
         description: 'Identificador do Pokémon.'
       }
 
@@ -242,7 +267,7 @@ export function createPokemonRoutes(
     '/:id',
     validateRequest(pokemonIdSchema, 'params'),
     (req, res) => {
-    /*
+      /*
       #swagger.tags = ['Pokemons']
       #swagger.summary = 'Exclui um Pokémon'
       #swagger.description = 'Remove do catálogo o Pokémon identificado pelo ID informado.'
@@ -251,7 +276,8 @@ export function createPokemonRoutes(
         in: 'path',
         required: true,
         type: 'string',
-        example: '25',
+        format: 'uuid',
+        example: '550e8400-e29b-41d4-a716-446655440000',
         description: 'Identificador do Pokémon.'
       }
 

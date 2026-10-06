@@ -32,20 +32,14 @@ export class PokemonController {
     return res.status(200).json(stats);
   }
 
-  async getById(
-    req: Request,
-    res: Response,
-  ): Promise<Response> {
+  async getById(req: Request, res: Response): Promise<Response> {
     const { id } = req.params as { id: string };
 
     const pokemon = await this.getPokemonByIdUseCase.execute(id);
     return res.status(200).json(pokemon);
   }
 
-  async create(
-    req: Request,
-    res: Response,
-  ): Promise<Response> {
+  async create(req: Request, res: Response): Promise<Response> {
     const pokemon = await this.createPokemonUseCase.execute(req.body);
     return res.status(201).json({
       success: true,
@@ -53,10 +47,7 @@ export class PokemonController {
     });
   }
 
-  async update(
-    req: Request,
-    res: Response,
-  ): Promise<Response> {
+  async update(req: Request, res: Response): Promise<Response> {
     const { id } = req.params as { id: string };
 
     const pokemon = await this.updatePokemonUseCase.execute({

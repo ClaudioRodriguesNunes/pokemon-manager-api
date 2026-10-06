@@ -31,10 +31,14 @@ const doc = {
       hp: 35,
       attack: 55,
       defense: 40,
+      spriteUrl:
+        'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png',
+      baseExperience: 112,
+      height: 4,
+      weight: 60,
     },
 
     CreatePokemonDTO: {
-      $id: '25',
       $name: 'Pikachu',
       $type: 'Electric',
       $hp: 35,
@@ -51,7 +55,9 @@ const doc = {
     },
 
     ErrorResponse: {
+      status: 'error',
       message: 'Pokémon não encontrado no catálogo.',
+      details: [],
     },
 
     PokemonStats: {

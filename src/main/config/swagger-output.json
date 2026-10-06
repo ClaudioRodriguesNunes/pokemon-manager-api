@@ -30,6 +30,13 @@
             "name": "type",
             "in": "query",
             "required": false,
+            "enum": [
+              "Fire",
+              "Water",
+              "Grass",
+              "Electric",
+              "Psychic"
+            ],
             "example": "Fire",
             "description": "Filtra os Pokémons pelo tipo.",
             "schema": {
@@ -98,6 +105,16 @@
                 }
               }
             }
+          },
+          "503": {
+            "description": "Serviço externo indisponível durante o cadastro.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -148,7 +165,8 @@
             "schema": {
               "type": "string"
             },
-            "example": "25",
+            "format": "uuid",
+            "example": "550e8400-e29b-41d4-a716-446655440000",
             "description": "Identificador do Pokémon."
           }
         ],
@@ -199,7 +217,8 @@
             "schema": {
               "type": "string"
             },
-            "example": "25",
+            "format": "uuid",
+            "example": "550e8400-e29b-41d4-a716-446655440000",
             "description": "Identificador do Pokémon."
           }
         ],
@@ -279,7 +298,8 @@
             "schema": {
               "type": "string"
             },
-            "example": "25",
+            "format": "uuid",
+            "example": "550e8400-e29b-41d4-a716-446655440000",
             "description": "Identificador do Pokémon."
           }
         ],
@@ -339,16 +359,28 @@
           "defense": {
             "type": "number",
             "example": 40
+          },
+          "spriteUrl": {
+            "type": "string",
+            "example": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png"
+          },
+          "baseExperience": {
+            "type": "number",
+            "example": 112
+          },
+          "height": {
+            "type": "number",
+            "example": 4
+          },
+          "weight": {
+            "type": "number",
+            "example": 60
           }
         }
       },
       "CreatePokemonDTO": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string",
-            "example": "25"
-          },
           "name": {
             "type": "string",
             "example": "Pikachu"
@@ -371,7 +403,6 @@
           }
         },
         "required": [
-          "id",
           "name",
           "type",
           "hp",
@@ -414,9 +445,18 @@
       "ErrorResponse": {
         "type": "object",
         "properties": {
+          "status": {
+            "type": "string",
+            "example": "error"
+          },
           "message": {
             "type": "string",
             "example": "Pokémon não encontrado no catálogo."
+          },
+          "details": {
+            "type": "array",
+            "example": [],
+            "items": {}
           }
         }
       },

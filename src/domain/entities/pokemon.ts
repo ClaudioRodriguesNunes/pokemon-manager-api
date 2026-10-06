@@ -15,9 +15,16 @@ export interface PokemonProps {
   hp: number;
   attack: number;
   defense: number;
+  spriteUrl?: string | null;
+  baseExperience?: number | null;
+  height?: number | null;
+  weight?: number | null;
 }
 
-export type UpdatePokemonProps = Omit<PokemonProps, 'id'>;
+export type UpdatePokemonProps = Pick<
+  PokemonProps,
+  'name' | 'type' | 'hp' | 'attack' | 'defense'
+>;
 
 export type CreatePokemonProps = Omit<PokemonProps, 'id'>;
 
@@ -29,6 +36,10 @@ export class Pokemon {
   private _hp: number;
   private _attack: number;
   private _defense: number;
+  private _spriteUrl: string | null;
+  private _baseExperience: number | null;
+  private _height: number | null;
+  private _weight: number | null;
 
   constructor(props: PokemonProps) {
     this.id = props.id;
@@ -44,6 +55,10 @@ export class Pokemon {
     this._hp = props.hp;
     this._attack = props.attack;
     this._defense = props.defense;
+    this._spriteUrl = props.spriteUrl ?? null;
+    this._baseExperience = props.baseExperience ?? null;
+    this._height = props.height ?? null;
+    this._weight = props.weight ?? null;
   }
 
   public get name(): string {
@@ -64,6 +79,22 @@ export class Pokemon {
 
   public get defense(): number {
     return this._defense;
+  }
+
+  public get spriteUrl(): string | null {
+    return this._spriteUrl;
+  }
+
+  public get baseExperience(): number | null {
+    return this._baseExperience;
+  }
+
+  public get height(): number | null {
+    return this._height;
+  }
+
+  public get weight(): number | null {
+    return this._weight;
   }
 
   public update(props: UpdatePokemonProps): void {
@@ -100,13 +131,17 @@ export class Pokemon {
 
   private validateAttack(value: number): void {
     if (typeof value !== 'number' || value <= 0) {
-      throw new DomainValidationError('Ataque deve ser um número maior que zero.');
+      throw new DomainValidationError(
+        'Ataque deve ser um número maior que zero.',
+      );
     }
   }
 
   private validateDefense(value: number): void {
     if (typeof value !== 'number' || value <= 0) {
-      throw new DomainValidationError('Defesa deve ser um número maior que zero.');
+      throw new DomainValidationError(
+        'Defesa deve ser um número maior que zero.',
+      );
     }
   }
 
@@ -118,6 +153,10 @@ export class Pokemon {
       hp: this.hp,
       attack: this.attack,
       defense: this.defense,
+      spriteUrl: this.spriteUrl,
+      baseExperience: this.baseExperience,
+      height: this.height,
+      weight: this.weight,
     };
   }
 }

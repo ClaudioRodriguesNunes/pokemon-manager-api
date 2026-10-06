@@ -65,6 +65,10 @@ export class PrismaPokemonRepository implements IPokemonRepository {
     hp: number;
     attack: number;
     defense: number;
+    spriteUrl: string | null;
+    baseExperience: number | null;
+    height: number | null;
+    weight: number | null;
   }): Pokemon {
     return new Pokemon({
       id: record.id,
@@ -73,6 +77,10 @@ export class PrismaPokemonRepository implements IPokemonRepository {
       hp: record.hp,
       attack: record.attack,
       defense: record.defense,
+      spriteUrl: record.spriteUrl,
+      baseExperience: record.baseExperience,
+      height: record.height,
+      weight: record.weight,
     });
   }
 }
