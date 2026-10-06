@@ -5,6 +5,86 @@ Projeto desenvolvido para a disciplina **Tópicos Especiais em Engenharia de Sof
 **Aluno:** Claudio R Nunes  
 **Curso:** Ciências da Computação
 
+## Entrega 2 — Persistência e Integrações
+
+A Entrega 2 adiciona persistência relacional com PostgreSQL e Prisma ORM, validação HTTP com Zod e integração opcional com a PokéAPI.
+
+### Principais recursos
+
+- PostgreSQL com Prisma ORM e migration versionada em `prisma/migrations/`;
+- UUID gerado pelo backend no cadastro; o cliente não envia `id` no POST;
+- atributos do cadastro: `name`, `type`, `hp`, `attack` e `defense`;
+- dados complementares da PokéAPI: `spriteUrl`, `baseExperience`, `height` e `weight`, podendo ser nulos;
+- tipos aceitos: `Fire`, `Water`, `Grass`, `Electric` e `Psychic`;
+- validação de body, UUID e filtro por tipo com Zod;
+- gateway Axios para a PokéAPI, com timeout de 3 segundos;
+- gateway em memória com Pikachu, Charmander e Bulbasaur;
+- `USE_EXTERNAL_API=false` seleciona o gateway em memória. Essa opção evita a PokéAPI, mas o armazenamento continua sendo PostgreSQL via Prisma.
+
+### Erros HTTP
+
+As respostas de erro seguem o formato comum `status`, `message` e `details`:
+
+- `400`: entrada inválida;
+- `404`: Pokémon não encontrado;
+- `503`: timeout, indisponibilidade ou resposta inválida da PokéAPI;
+- `500`: falha inesperada, com mensagem segura para o cliente.
+
+### Roteiro breve para apresentação
+
+Com o banco local configurado, a API em execução e a documentação aberta em `http://localhost:3333/api/docs`:
+
+1. Faça `POST /api/v1/pokemons` sem `id`, usando, por exemplo:
+
+   ```json
+   {
+     "name": "Pikachu",
+     "type": "Electric",
+     "hp": 35,
+     "attack": 55,
+     "defense": 40
+   }
+   ```
+
+2. Copie o UUID retornado e consulte `GET /api/v1/pokemons?type=Electric`, `GET /api/v1/pokemons/stats` e `GET /api/v1/pokemons/{id}`.
+3. Execute `PUT /api/v1/pokemons/{id}` com os cinco atributos do cadastro.
+4. Execute `DELETE /api/v1/pokemons/{id}` e confirme `204 No Content`; depois repita o GET por ID para demonstrar o `404`.
+5. Para demonstrar validação, envie um tipo fora da lista ou um atributo não inteiro/positivo e observe o `400`.
+
+Os exemplos acima não incluem UUIDs de teste e devem ser executados somente em ambiente local configurado.
+
+### Configuração e comandos
+
+Use `.env.example` como referência e crie um `.env` local sem versioná-lo. Configure uma `DATABASE_URL` apontando para um PostgreSQL local dedicado. Os comandos disponíveis são:
+
+```powershell
+npm install
+npx prisma validate
+npx prisma migrate dev --name create-pokemons-table
+npm run dev
+npm run swagger
+npm run build
+npm run lint
+npm test
+```
+
+O Swagger fica disponível em `/api/docs`. O modo `USE_EXTERNAL_API=false` não elimina a necessidade de PostgreSQL.
+
+### Verificações locais registradas
+
+No ambiente local do responsável pelo projeto foram registrados:
+
+- migration inicial aplicada ao banco local de desenvolvimento, sem expor URL, senha ou registros;
+- CRUD demonstrado pelo Swagger, com dados preservados após reinício da API;
+- filtro por tipo, estatísticas, consulta por ID, atualização e exclusão com `204`;
+- consulta posterior à exclusão retornando recurso não encontrado;
+- gateway offline selecionado com `USE_EXTERNAL_API=false`;
+- timeout da PokéAPI simulado com resposta `503`, com timeout restaurado para 3000 ms e gateway offline novamente selecionado;
+- `npm test` aprovado, `npm run swagger` e `npm run build` concluídos;
+- lint aprovado após os ajustes locais de formatação.
+
+Esses resultados são registros do ambiente local e não representam uma configuração pública ou compartilhada do banco.
+
 ## Entrega 1 — Arquitetura, Contrato REST e Documentação Interativa
 
 A primeira entrega consolida uma API REST para gerenciamento de um catálogo de Pokémon utilizando **TypeScript**, **Express**, **Clean Architecture**, repositório **In-Memory** e documentação interativa com **OpenAPI 3.0 / Swagger UI**.
@@ -793,85 +873,3 @@ comportamento anterior preservado
 ```
 
 O projeto encerra esta etapa com uma base coerente com os conteúdos estudados nas Aulas 1 a 5 e preparada para evoluir nas próximas entregas sem antecipar tecnologias que ainda não pertencem ao escopo atual.
-
-## 17. Entrega 2 — Persistência e Integrações
-
-Nesta etapa, o projeto passou a possuir a base de persistência PostgreSQL com Prisma ORM, validação de entrada com Zod e integração opcional com a PokéAPI.
-
-### Tecnologias e pré-requisitos
-
-- Node.js e npm;
-- TypeScript, Express e `tsx`;
-- PostgreSQL local dedicado ao projeto;
-- Prisma CLI `6.19.3` e `@prisma/client` `6.19.3`;
-- Axios para a integração externa;
-- Zod para validação na borda HTTP.
-
-### Configuração
-
-Copie `.env.example` para `.env` e configure uma `DATABASE_URL` de desenvolvimento. O arquivo `.env` não deve ser versionado.
-
-`USE_EXTERNAL_API=false` seleciona o `InMemoryPokemonGateway`, com dados de Pikachu, Charmander e Bulbasaur, evitando a chamada à PokéAPI. Essa configuração não substitui o PostgreSQL: o CRUD continua usando o repositório Prisma.
-
-Quando `USE_EXTERNAL_API` estiver ausente ou tiver outro valor, a aplicação usa o gateway Axios da PokéAPI.
-
-### Instalação, migration e execução
-
-```powershell
-npm install
-npx prisma validate
-npx prisma migrate dev --name create-pokemons-table
-npm run dev
-```
-
-A migration inicial está versionada em `prisma/migrations/`, mas não foi aplicada no ambiente deste trabalho. A aplicação e a persistência PostgreSQL devem ser consideradas não validadas até que o aluno configure um banco local dedicado e execute a migration.
-
-Scripts disponíveis:
-
-```text
-npm run swagger
-npm run dev
-npm run build
-npm run lint
-npm test
-```
-
-### Swagger
-
-Com o servidor em execução, a documentação interativa fica disponível em:
-
-```text
-http://localhost:3333/api/docs
-```
-
-### Endpoints atuais
-
-| Método | Endpoint | Descrição |
-|---|---|---|
-| GET | `/api/v1/pokemons` | Lista Pokémon; aceita `?type=Fire`, `Water`, `Grass`, `Electric` ou `Psychic` |
-| GET | `/api/v1/pokemons/stats` | Estatísticas do catálogo |
-| GET | `/api/v1/pokemons/:id` | Consulta por UUID |
-| POST | `/api/v1/pokemons` | Cria sem enviar `id`; exige `name`, `type`, `hp`, `attack` e `defense` |
-| PUT | `/api/v1/pokemons/:id` | Atualiza os cinco atributos do cadastro; o ID fica somente no path |
-| DELETE | `/api/v1/pokemons/:id` | Remove por UUID |
-
-A resposta de criação inclui o UUID gerado e `spriteUrl`, `baseExperience`, `height` e `weight`. Esses campos externos podem ser nulos no armazenamento.
-
-### Integração externa e erros
-
-Na criação, a PokéAPI é consultada pelo nome. Pokémon inexistente resulta em HTTP 404. Falhas de comunicação, timeout de 3 segundos, resposta inválida ou indisponibilidade externa resultam em HTTP 503. Entradas inválidas resultam em HTTP 400, e falhas inesperadas resultam em HTTP 500 com mensagem genérica.
-
-Os testes isolados do gateway Axios verificaram o mapeamento de Pikachu e o retorno `null` para um nome inexistente. Timeout/503, PostgreSQL, migration aplicada e persistência integrada ainda não foram testados.
-
-### Testes e validação
-
-Os testes nativos usam `node:test` por meio do `tsx` e não dependem de PostgreSQL nem de internet:
-
-```powershell
-npm test
-npx tsc --noEmit
-npm run lint
-npm run build
-```
-
-Os testes focados cobrem schemas Zod, UUID, serialização da entidade, gateway em memória e criação com repositório/gateway falsos.
