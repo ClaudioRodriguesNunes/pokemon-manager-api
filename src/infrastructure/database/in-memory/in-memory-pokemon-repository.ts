@@ -1,5 +1,7 @@
 import { Pokemon } from '../../../domain/entities/pokemon.js';
 import { IPokemonRepository } from '../../../domain/repositories/pokemon-repository.js';
+import { randomUUID } from 'node:crypto';
+import { CreatePokemonProps } from '../../../domain/entities/pokemon.js';
 
 export class InMemoryPokemonRepository implements IPokemonRepository {
   private pokemons: Pokemon[] = [];
@@ -20,8 +22,15 @@ export class InMemoryPokemonRepository implements IPokemonRepository {
     return pokemon ?? null;
   }
 
-  async create(pokemon: Pokemon): Promise<void> {
+  async create(input: CreatePokemonProps): Promise<Pokemon> {
+    const pokemon = new Pokemon({
+      id: randomUUID(),
+      ...input,
+    });
+
     this.pokemons.push(pokemon);
+
+    return pokemon;
   }
 
   async update(pokemon: Pokemon): Promise<void> {

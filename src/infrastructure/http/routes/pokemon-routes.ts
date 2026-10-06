@@ -1,12 +1,19 @@
 import { Router } from 'express';
 import { PokemonController } from '../controllers/pokemon-controller.js';
+import { validateRequest } from '../validation/validate-request.js';
+import {
+  createPokemonSchema,
+  listPokemonsQuerySchema,
+  pokemonIdSchema,
+  updatePokemonSchema,
+} from '../validation/pokemon-schemas.js';
 
 export function createPokemonRoutes(
   pokemonController: PokemonController,
 ): Router {
   const pokemonRoutes = Router();
 
-  pokemonRoutes.get('/', (req, res) => {
+  pokemonRoutes.get('/', validateRequest(listPokemonsQuerySchema, 'query'), (req, res) => {
     /*
       #swagger.tags = ['Pokemons']
       #swagger.summary = 'Lista os Pokémons'
@@ -53,7 +60,7 @@ export function createPokemonRoutes(
     return pokemonController.stats(req, res);
   });
 
-  pokemonRoutes.get('/:id', (req, res) => {
+  pokemonRoutes.get('/:id', validateRequest(pokemonIdSchema, 'params'), (req, res) => {
     /*
       #swagger.tags = ['Pokemons']
       #swagger.summary = 'Busca um Pokémon por ID'
@@ -97,7 +104,7 @@ export function createPokemonRoutes(
     return pokemonController.getById(req, res);
   });
 
-  pokemonRoutes.post('/', (req, res) => {
+  pokemonRoutes.post('/', validateRequest(createPokemonSchema, 'body'), (req, res) => {
     /*
       #swagger.tags = ['Pokemons']
       #swagger.summary = 'Cadastra um Pokémon'
@@ -153,7 +160,11 @@ export function createPokemonRoutes(
     return pokemonController.create(req, res);
   });
 
-  pokemonRoutes.put('/:id', (req, res) => {
+  pokemonRoutes.put(
+    '/:id',
+    validateRequest(pokemonIdSchema, 'params'),
+    validateRequest(updatePokemonSchema, 'body'),
+    (req, res) => {
     /*
       #swagger.tags = ['Pokemons']
       #swagger.summary = 'Atualiza um Pokémon'
@@ -223,10 +234,14 @@ export function createPokemonRoutes(
         }
       }
     */
-    return pokemonController.update(req, res);
-  });
+      return pokemonController.update(req, res);
+    },
+  );
 
-  pokemonRoutes.delete('/:id', (req, res) => {
+  pokemonRoutes.delete(
+    '/:id',
+    validateRequest(pokemonIdSchema, 'params'),
+    (req, res) => {
     /*
       #swagger.tags = ['Pokemons']
       #swagger.summary = 'Exclui um Pokémon'
@@ -262,8 +277,9 @@ export function createPokemonRoutes(
         }
       }
     */
-    return pokemonController.delete(req, res);
-  });
+      return pokemonController.delete(req, res);
+    },
+  );
 
   return pokemonRoutes;
 }

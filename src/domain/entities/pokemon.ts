@@ -6,6 +6,8 @@ export enum PokemonType {
   PSYCHIC = 'Psychic',
 }
 
+import { DomainValidationError } from '../errors/validation-error.js';
+
 export interface PokemonProps {
   id: string;
   name: string;
@@ -16,6 +18,8 @@ export interface PokemonProps {
 }
 
 export type UpdatePokemonProps = Omit<PokemonProps, 'id'>;
+
+export type CreatePokemonProps = Omit<PokemonProps, 'id'>;
 
 export class Pokemon {
   public readonly id: string;
@@ -78,31 +82,31 @@ export class Pokemon {
 
   private validateName(value: string): void {
     if (typeof value !== 'string' || value.trim() === '') {
-      throw new Error('Nome deve ser uma string não vazia.');
+      throw new DomainValidationError('Nome deve ser uma string não vazia.');
     }
   }
 
   private validateType(value: PokemonType): void {
     if (!Object.values(PokemonType).includes(value)) {
-      throw new Error('Tipo de Pokémon inválido.');
+      throw new DomainValidationError('Tipo de Pokémon inválido.');
     }
   }
 
   private validateHp(value: number): void {
     if (typeof value !== 'number' || value <= 0) {
-      throw new Error('HP deve ser um número maior que zero.');
+      throw new DomainValidationError('HP deve ser um número maior que zero.');
     }
   }
 
   private validateAttack(value: number): void {
     if (typeof value !== 'number' || value <= 0) {
-      throw new Error('Ataque deve ser um número maior que zero.');
+      throw new DomainValidationError('Ataque deve ser um número maior que zero.');
     }
   }
 
   private validateDefense(value: number): void {
     if (typeof value !== 'number' || value <= 0) {
-      throw new Error('Defesa deve ser um número maior que zero.');
+      throw new DomainValidationError('Defesa deve ser um número maior que zero.');
     }
   }
 

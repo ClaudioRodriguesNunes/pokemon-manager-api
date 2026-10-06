@@ -6,18 +6,6 @@ export class CreatePokemonUseCase {
   constructor(private pokemonRepository: IPokemonRepository) {}
 
   async execute(input: CreatePokemonDTO): Promise<Pokemon> {
-    const pokemonAlreadyExists = await this.pokemonRepository.findById(
-      input.id,
-    );
-
-    if (pokemonAlreadyExists) {
-      throw new Error('Pokémon já cadastrado.');
-    }
-
-    const pokemon = new Pokemon(input);
-
-    await this.pokemonRepository.create(pokemon);
-
-    return pokemon;
+    return this.pokemonRepository.create(input);
   }
 }

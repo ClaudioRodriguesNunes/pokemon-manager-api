@@ -4,10 +4,10 @@ import { GetPokemonByIdUseCase } from '../../application/use-cases/get-pokemon-b
 import { GetPokemonStatsUseCase } from '../../application/use-cases/get-pokemon-stats.js';
 import { ListPokemonsUseCase } from '../../application/use-cases/list-pokemons.js';
 import { UpdatePokemonUseCase } from '../../application/use-cases/update-pokemon.js';
-import { InMemoryPokemonRepository } from '../../infrastructure/database/in-memory/in-memory-pokemon-repository.js';
+import { PrismaPokemonRepository } from '../../infrastructure/database/prisma/prisma-pokemon-repository.js';
 import { PokemonController } from '../../infrastructure/http/controllers/pokemon-controller.js';
 
-const pokemonRepository = new InMemoryPokemonRepository();
+const pokemonRepository = new PrismaPokemonRepository();
 
 export function makePokemonController(): PokemonController {
   const listPokemonsUseCase = new ListPokemonsUseCase(pokemonRepository);

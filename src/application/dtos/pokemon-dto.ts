@@ -1,7 +1,6 @@
 import { PokemonType } from '../../domain/entities/pokemon.js';
 
 export interface CreatePokemonDTO {
-  id: string;
   name: string;
   type: PokemonType;
   hp: number;

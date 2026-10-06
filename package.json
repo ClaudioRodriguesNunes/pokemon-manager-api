@@ -23,11 +23,13 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.6",
     "prettier": "^3.9.6",
+    "prisma": "^6.19.3",
     "swagger-autogen": "^2.23.7",
     "tsx": "^4.23.13",
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@prisma/client": "^6.19.3",
     "acorn": "^8.18.0",
     "acorn-jsx": "^5.3.2",
     "ajv": "^6.15.0",
@@ -126,7 +128,8 @@
     "which": "^2.0.2",
     "word-wrap": "^1.2.5",
     "wrappy": "^1.0.2",
-    "yocto-queue": "^0.1.0"
+    "yocto-queue": "^0.1.0",
+    "zod": "^4.6.5"
   },
   "repository": {
     "type": "git",

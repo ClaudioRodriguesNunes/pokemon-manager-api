@@ -1,6 +1,7 @@
 import express from 'express';
 
 import { createPokemonRoutes } from '../infrastructure/http/routes/pokemon-routes.js';
+import { errorHandler } from '../infrastructure/http/errors/error-handler.js';
 import { setupSwagger } from './config/swagger.js';
 import { makePokemonController } from './factories/make-pokemon-controller.js';
 
@@ -22,6 +23,8 @@ const pokemonController = makePokemonController();
 const pokemonRoutes = createPokemonRoutes(pokemonController);
 
 app.use('/api/v1/pokemons', pokemonRoutes);
+
+app.use(errorHandler);
 
 const PORT = 3333;
 
