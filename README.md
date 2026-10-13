@@ -3,7 +3,7 @@
 Projeto desenvolvido para a disciplina **Tópicos Especiais em Engenharia de Software**, com foco na evolução prática dos conteúdos estudados ao longo das Aulas 1 a 5.
 
 **Aluno:** Claudio R Nunes  
-**Curso:** Ciências da Computação
+**Curso:** Ciência da Computação
 
 ## Entrega 2 — Persistência e Integrações
 
