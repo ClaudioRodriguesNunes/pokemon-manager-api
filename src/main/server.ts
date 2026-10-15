@@ -1,30 +1,6 @@
-import express from 'express';
+import { createApp } from './app.js';
 
-import { createPokemonRoutes } from '../infrastructure/http/routes/pokemon-routes.js';
-import { errorHandler } from '../infrastructure/http/errors/error-handler.js';
-import { setupSwagger } from './config/swagger.js';
-import { makePokemonController } from './factories/make-pokemon-controller.js';
-
-const app = express();
-
-app.use(express.json());
-
-app.use((req, res, next) => {
-  res.on('finish', () => {
-    console.log(`${req.method} ${req.originalUrl} -> ${res.statusCode}`);
-  });
-
-  next();
-});
-
-setupSwagger(app);
-
-const pokemonController = makePokemonController();
-const pokemonRoutes = createPokemonRoutes(pokemonController);
-
-app.use('/api/v1/pokemons', pokemonRoutes);
-
-app.use(errorHandler);
+const app = createApp();
 
 const PORT = 3333;
 
