@@ -105,6 +105,47 @@
       }
     },
     "/api/v1/trainers": {
+      "get": {
+        "tags": [
+          "Treinadores"
+        ],
+        "summary": "Listar Treinadores",
+        "description": "Lista todos os Treinadores em ordem estável por nome e UUID.",
+        "responses": {
+          "200": {
+            "description": "Treinadores encontrados",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Trainer"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno inesperado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
       "post": {
         "tags": [
           "Treinadores"
@@ -142,7 +183,7 @@
             }
           },
           "409": {
-            "description": "E-mail já cadastrado",
+            "description": "Nome ou e-mail já cadastrado",
             "content": {
               "application/json": {
                 "schema": {
@@ -178,21 +219,21 @@
                 "properties": {
                   "name": {
                     "type": "string",
-                    "example": "Misty"
+                    "example": "Claudio"
                   },
                   "age": {
                     "type": "integer",
-                    "example": 16,
+                    "example": 25,
                     "minimum": 1
                   },
                   "city": {
                     "type": "string",
-                    "example": "Cerulean"
+                    "example": "São Paulo"
                   },
                   "email": {
                     "type": "string",
                     "format": "email",
-                    "example": "misty@example.com"
+                    "example": "claudio@example.com"
                   }
                 }
               }
@@ -201,23 +242,88 @@
         }
       }
     },
-    "/api/v1/trainers/{trainerId}/captures": {
+    "/api/v1/trainers/search": {
+      "get": {
+        "tags": [
+          "Treinadores"
+        ],
+        "summary": "Pesquisar Treinadores por nome",
+        "description": "Pesquisa por trecho do nome, ignorando maiúsculas/minúsculas e espaços externos. Homônimos são retornados juntos.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "example": "misty",
+            "description": "Nome ou trecho do nome do Treinador",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Treinadores encontrados; lista vazia quando não houver correspondência",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Trainer"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Query inválida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno inesperado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trainers/by-name/{trainerName}/captures": {
       "post": {
         "tags": [
           "Treinadores"
         ],
-        "summary": "Capturar Pokémon",
-        "description": "Consulta a PokéAPI oficial e persiste um snapshot ativo. Cada Treinador pode ter no máximo seis Capturas ativas.",
+        "summary": "Capturar Pokémon pelo nome do Treinador",
+        "description": "Os nomes do Treinador e do Pokémon são aparados e comparados sem diferenciar maiúsculas/minúsculas. O snapshot completo da PokéAPI é persistido. Um Treinador pode ter no máximo seis Capturas ativas e não pode capturar o mesmo Pokémon duas vezes, mesmo após liberação.",
         "parameters": [
           {
-            "name": "trainerId",
+            "name": "trainerName",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string"
             },
-            "format": "uuid",
-            "example": "123e4567-e89b-42d3-a456-426614174000"
+            "example": "Claudio",
+            "description": "Nome normalizado do Treinador; espaços podem ser codificados na URL"
           }
         ],
         "responses": {
@@ -241,7 +347,7 @@
             }
           },
           "400": {
-            "description": "UUID ou body inválido",
+            "description": "Nome ou body inválido",
             "content": {
               "application/json": {
                 "schema": {
@@ -261,7 +367,7 @@
             }
           },
           "409": {
-            "description": "Limite de seis Capturas ativas atingido",
+            "description": "Nome duplicado, Pokémon já capturado ou limite de seis Capturas ativas atingido",
             "content": {
               "application/json": {
                 "schema": {
@@ -311,30 +417,28 @@
             }
           }
         }
-      }
-    },
-    "/api/v1/trainers/{trainerId}/team": {
+      },
       "get": {
         "tags": [
           "Treinadores"
         ],
-        "summary": "Consultar time ativo",
-        "description": "Retorna somente Capturas ativas; Capturas liberadas continuam preservadas no histórico armazenado.",
+        "summary": "Consultar histórico por nome",
+        "description": "Retorna todas as Capturas do Treinador, incluindo as liberadas (active=false).",
         "parameters": [
           {
-            "name": "trainerId",
+            "name": "trainerName",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string"
             },
-            "format": "uuid",
-            "example": "123e4567-e89b-42d3-a456-426614174000"
+            "example": "Claudio",
+            "description": "Nome normalizado do Treinador"
           }
         ],
         "responses": {
           "200": {
-            "description": "Time ativo",
+            "description": "Histórico completo de Capturas",
             "content": {
               "application/json": {
                 "schema": {
@@ -356,7 +460,7 @@
             }
           },
           "400": {
-            "description": "UUID inválido",
+            "description": "Nome inválido",
             "content": {
               "application/json": {
                 "schema": {
@@ -388,33 +492,108 @@
         }
       }
     },
-    "/api/v1/trainers/{trainerId}/captures/{captureId}/release": {
+    "/api/v1/trainers/by-name/{trainerName}/team": {
+      "get": {
+        "tags": [
+          "Treinadores"
+        ],
+        "summary": "Consultar time por nome",
+        "description": "Retorna somente Capturas ativas; Capturas liberadas continuam preservadas no histórico.",
+        "parameters": [
+          {
+            "name": "trainerName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "Claudio",
+            "description": "Nome normalizado do Treinador"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Time ativo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Capture"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Nome inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Treinador não encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno inesperado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trainers/by-name/{trainerName}/captures/by-name/{pokemonName}/release": {
       "patch": {
         "tags": [
           "Treinadores"
         ],
-        "summary": "Liberar Captura",
-        "description": "Marca a Captura como inativa sem exclusão física. A operação é idempotente: repeti-la devolve 200 e a mesma Captura inativa.",
+        "summary": "Liberar Captura pelo nome",
+        "description": "Marca a Captura como inativa sem exclusão física. A operação é idempotente: repeti-la devolve 200 e o mesmo snapshot inativo.",
         "parameters": [
           {
-            "name": "trainerId",
+            "name": "trainerName",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string"
             },
-            "format": "uuid",
-            "example": "123e4567-e89b-42d3-a456-426614174000"
+            "example": "Claudio",
+            "description": "Nome normalizado do Treinador"
           },
           {
-            "name": "captureId",
+            "name": "pokemonName",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string"
             },
-            "format": "uuid",
-            "example": "123e4567-e89b-42d3-a456-426614174001"
+            "example": "pikachu",
+            "description": "Nome normalizado do Pokémon"
           }
         ],
         "responses": {
@@ -438,7 +617,7 @@
             }
           },
           "400": {
-            "description": "UUID ou body inválido",
+            "description": "Nome ou body inválido",
             "content": {
               "application/json": {
                 "schema": {
@@ -448,7 +627,7 @@
             }
           },
           "404": {
-            "description": "Captura não encontrada para o Treinador",
+            "description": "Treinador ou Captura não encontrada",
             "content": {
               "application/json": {
                 "schema": {

@@ -4,6 +4,7 @@ import {
   PokemonCapture,
 } from '../../../domain/entities/pokemon-capture.js';
 import { ActiveCaptureLimitError } from '../../../domain/errors/active-capture-limit-error.js';
+import { DuplicateCaptureError } from '../../../domain/errors/duplicate-capture-error.js';
 import { TrainerNotFoundError } from '../../../domain/errors/trainer-not-found-error.js';
 import { IPokemonCaptureRepository } from '../../../domain/repositories/pokemon-capture-repository.js';
 import { prisma } from './prisma-client.js';
@@ -12,6 +13,14 @@ const MAX_ACTIVE_CAPTURES = 6;
 const SERIALIZABLE_ATTEMPTS = 3;
 
 export class PrismaPokemonCaptureRepository implements IPokemonCaptureRepository {
+  async findAllByTrainerId(trainerId: string): Promise<PokemonCapture[]> {
+    const records = await prisma.pokemonCapture.findMany({
+      where: { trainerId },
+      orderBy: { id: 'asc' },
+    });
+    return records.map((record) => this.toDomain(record));
+  }
+
   async findActiveByTrainerId(trainerId: string): Promise<PokemonCapture[]> {
     const records = await prisma.pokemonCapture.findMany({
       where: { trainerId, active: true },
@@ -37,6 +46,19 @@ export class PrismaPokemonCaptureRepository implements IPokemonCaptureRepository
               select: { id: true },
             });
             if (!trainer) throw new TrainerNotFoundError();
+
+            const existingCapture = await transaction.pokemonCapture.findUnique(
+              {
+                where: {
+                  trainerId_pokeApiId: {
+                    trainerId: input.trainerId,
+                    pokeApiId: input.pokeApiId,
+                  },
+                },
+                select: { id: true },
+              },
+            );
+            if (existingCapture) throw new DuplicateCaptureError();
 
             const activeCaptures = await transaction.pokemonCapture.count({
               where: { trainerId: input.trainerId, active: true },

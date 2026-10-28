@@ -3,6 +3,7 @@ import { test } from 'node:test';
 import { CapturePokemonUseCase } from '../src/application/use-cases/capture-pokemon.js';
 import { CreateTrainerUseCase } from '../src/application/use-cases/create-trainer.js';
 import { FindPokemonByNameUseCase } from '../src/application/use-cases/find-pokemon-by-name.js';
+import { GetTrainerCaptureHistoryUseCase } from '../src/application/use-cases/get-trainer-capture-history.js';
 import { GetActiveTeamUseCase } from '../src/application/use-cases/get-active-team.js';
 import { ReleasePokemonCaptureUseCase } from '../src/application/use-cases/release-pokemon-capture.js';
 import {
@@ -12,6 +13,7 @@ import {
 import { CreateTrainerProps, Trainer } from '../src/domain/entities/trainer.js';
 import { ActiveCaptureLimitError } from '../src/domain/errors/active-capture-limit-error.js';
 import { CaptureNotFoundError } from '../src/domain/errors/capture-not-found-error.js';
+import { DuplicateCaptureError } from '../src/domain/errors/duplicate-capture-error.js';
 import { ExternalGatewayError } from '../src/domain/errors/external-gateway-error.js';
 import { DomainValidationError } from '../src/domain/errors/validation-error.js';
 import { PokemonNotFoundError } from '../src/domain/errors/pokemon-not-found-error.js';
@@ -40,11 +42,30 @@ const pikachu: PokeApiPokemonData = {
   weight: 60,
 };
 
+const otherPokemon = (
+  id: number,
+  name = `pokemon-${id}`,
+): PokeApiPokemonData => ({
+  ...pikachu,
+  pokeApiId: id,
+  name,
+});
+
 class FakeTrainerRepository implements ITrainerRepository {
   public trainers: Trainer[] = [];
 
+  async findAll(): Promise<Trainer[]> {
+    return this.trainers;
+  }
+
   async findById(id: string): Promise<Trainer | null> {
     return this.trainers.find((trainer) => trainer.id === id) ?? null;
+  }
+
+  async findByName(name: string): Promise<Trainer[]> {
+    return this.trainers.filter((trainer) =>
+      trainer.name.toLowerCase().includes(name.trim().toLowerCase()),
+    );
   }
 
   async create(input: CreateTrainerProps): Promise<Trainer> {
@@ -59,6 +80,10 @@ class FakeTrainerRepository implements ITrainerRepository {
 
 class FakeCaptureRepository implements IPokemonCaptureRepository {
   public captures: PokemonCapture[] = [];
+
+  async findAllByTrainerId(trainerId: string): Promise<PokemonCapture[]> {
+    return this.captures.filter((capture) => capture.trainerId === trainerId);
+  }
 
   async findActiveByTrainerId(trainerId: string): Promise<PokemonCapture[]> {
     return this.captures.filter(
@@ -192,13 +217,14 @@ test('does not persist a capture when the external gateway fails', async () => {
   assert.equal(captures.captures.length, 0);
 });
 
-test('rejects a seventh active capture with a conflict error', async () => {
+test('rejects a duplicate capture even after the previous capture is released', async () => {
   const trainers = new FakeTrainerRepository();
   const captures = new FakeCaptureRepository();
   const trainer = await createTrainer(trainers);
-  for (let index = 0; index < 6; index += 1) {
-    await captures.createIfCapacity({ trainerId: trainer.id, ...pikachu });
-  }
+  const first = await captures.createIfCapacity({
+    trainerId: trainer.id,
+    ...pikachu,
+  });
 
   const action = new CapturePokemonUseCase(
     trainers,
@@ -207,6 +233,35 @@ test('rejects a seventh active capture with a conflict error', async () => {
   );
   await assert.rejects(
     () => action.execute({ trainerId: trainer.id, pokemonName: 'pikachu' }),
+    (error: DuplicateCaptureError) =>
+      error instanceof DuplicateCaptureError && error.statusCode === 409,
+  );
+  first.release();
+  await assert.rejects(
+    () => action.execute({ trainerId: trainer.id, pokemonName: 'pikachu' }),
+    DuplicateCaptureError,
+  );
+  assert.equal(captures.captures.length, 1);
+});
+
+test('preserves the six active capture limit for distinct Pokémon', async () => {
+  const trainers = new FakeTrainerRepository();
+  const captures = new FakeCaptureRepository();
+  const trainer = await createTrainer(trainers);
+  for (let index = 0; index < 6; index += 1) {
+    await captures.createIfCapacity({
+      trainerId: trainer.id,
+      ...otherPokemon(index + 1),
+    });
+  }
+
+  const action = new CapturePokemonUseCase(
+    trainers,
+    captures,
+    new FakePokeApiGateway(otherPokemon(999)),
+  );
+  await assert.rejects(
+    () => action.execute({ trainerId: trainer.id, pokemonName: 'pokemon-999' }),
     (error: ActiveCaptureLimitError) =>
       error instanceof ActiveCaptureLimitError && error.statusCode === 409,
   );
@@ -223,7 +278,7 @@ test('returns only active captures in the trainer team', async () => {
   });
   const released = await captures.createIfCapacity({
     trainerId: trainer.id,
-    ...pikachu,
+    ...otherPokemon(4, 'charmander'),
   });
   released.release();
 
@@ -233,6 +288,41 @@ test('returns only active captures in the trainer team', async () => {
   assert.deepEqual(
     team.map((capture) => capture.id),
     [active.id],
+  );
+});
+
+test('returns the complete capture history, including released captures', async () => {
+  const trainers = new FakeTrainerRepository();
+  const captures = new FakeCaptureRepository();
+  const trainer = await createTrainer(trainers);
+  const active = await captures.createIfCapacity({
+    trainerId: trainer.id,
+    ...pikachu,
+  });
+  const released = await captures.createIfCapacity({
+    trainerId: trainer.id,
+    ...otherPokemon(4, 'charmander'),
+  });
+  released.release();
+
+  const history = await new GetTrainerCaptureHistoryUseCase(
+    trainers,
+    captures,
+  ).execute(trainer.id);
+
+  assert.deepEqual(
+    history.map((capture) => [capture.id, capture.active]),
+    [
+      [active.id, true],
+      [released.id, false],
+    ],
+  );
+  await assert.rejects(
+    () =>
+      new GetTrainerCaptureHistoryUseCase(trainers, captures).execute(
+        'missing-trainer',
+      ),
+    /Treinador não encontrado/,
   );
 });
 

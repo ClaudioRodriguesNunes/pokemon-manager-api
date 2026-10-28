@@ -5,6 +5,10 @@ export interface CreateTrainerDTO {
   email: string;
 }
 
-export interface TrainerParams {
-  trainerId: string;
+export interface TrainerNameParams {
+  trainerName: string;
+}
+
+export interface ReleaseCaptureByNameParams extends TrainerNameParams {
+  pokemonName: string;
 }

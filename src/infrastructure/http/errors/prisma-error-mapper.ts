@@ -1,5 +1,7 @@
 import { Prisma } from '@prisma/client';
 import { AppError } from '../../../domain/errors/app-error.js';
+import { DuplicateCaptureError } from '../../../domain/errors/duplicate-capture-error.js';
+import { DuplicateTrainerNameError } from '../../../domain/errors/duplicate-trainer-name-error.js';
 import { ResourceNotFoundError } from '../../../domain/errors/resource-not-found-error.js';
 
 export function mapPrismaError(error: unknown): AppError | null {
@@ -22,6 +24,17 @@ export function mapPrismaError(error: unknown): AppError | null {
         : [];
     if (fields.some((field) => field.toLowerCase().includes('email'))) {
       return new AppError('E-mail de Treinador já cadastrado.', 409);
+    }
+    if (
+      fields.some((field) => field.toLowerCase().includes('namenormalized'))
+    ) {
+      return new DuplicateTrainerNameError();
+    }
+    if (
+      fields.some((field) => field.toLowerCase().includes('trainerid')) &&
+      fields.some((field) => field.toLowerCase().includes('pokeapiid'))
+    ) {
+      return new DuplicateCaptureError();
     }
   }
 

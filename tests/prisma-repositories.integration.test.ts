@@ -37,8 +37,18 @@ const pokemon: PokeApiPokemonData = {
 };
 
 class StubPokeApiGateway implements IPokeApiGateway {
-  async findByName(_name: string): Promise<PokeApiPokemonData> {
-    return pokemon;
+  async findByName(name: string): Promise<PokeApiPokemonData> {
+    const normalizedName = name.trim().toLowerCase();
+    return {
+      ...pokemon,
+      name: normalizedName,
+      pokeApiId:
+        normalizedName === pokemon.name
+          ? pokemon.pokeApiId
+          : normalizedName
+              .split('')
+              .reduce((total, character) => total + character.charCodeAt(0), 1000),
+    };
   }
 }
 
@@ -108,18 +118,18 @@ integrationTest(
       for (let index = 0; index < 4; index += 1) {
         await capturePokemon.execute({
           trainerId: trainer.id,
-          pokemonName: pokemon.name,
+          pokemonName: `starmie-${index + 2}`,
         });
       }
 
       const concurrent = await Promise.allSettled([
         capturePokemon.execute({
           trainerId: trainer.id,
-          pokemonName: pokemon.name,
+          pokemonName: 'starmie-6',
         }),
         capturePokemon.execute({
           trainerId: trainer.id,
-          pokemonName: pokemon.name,
+          pokemonName: 'starmie-7',
         }),
       ]);
       assert.equal(
@@ -144,7 +154,7 @@ integrationTest(
             trainerId: trainer.id,
             pokemonName: pokemon.name,
           }),
-        ActiveCaptureLimitError,
+        /Treinador já possui ou já possuiu este Pokémon/,
       );
 
       const team = await new GetActiveTeamUseCase(trainers, captures).execute(
@@ -207,7 +217,7 @@ integrationTest(
 
       const replacement = await capturePokemon.execute({
         trainerId: trainer.id,
-        pokemonName: pokemon.name,
+        pokemonName: 'starmie-replacement',
       });
       assert.equal(replacement.active, true);
       assert.equal(

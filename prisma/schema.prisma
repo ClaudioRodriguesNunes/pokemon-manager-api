@@ -23,11 +23,12 @@ model Pokemon {
 }
 
 model Trainer {
-  id       String           @id @default(uuid())
-  name     String
-  age      Int
-  city     String
-  email    String           @unique
+  id             String           @id @default(uuid())
+  name           String
+  nameNormalized String           @unique
+  age            Int
+  city           String
+  email          String           @unique
   captures PokemonCapture[]
 
   @@map("trainers")
@@ -53,5 +54,6 @@ model PokemonCapture {
   trainer        Trainer  @relation(fields: [trainerId], references: [id], onDelete: Restrict)
 
   @@index([trainerId, active])
+  @@unique([trainerId, pokeApiId])
   @@map("captures")
 }

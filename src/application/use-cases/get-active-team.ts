@@ -1,7 +1,7 @@
 import { PokemonCapture } from '../../domain/entities/pokemon-capture.js';
-import { TrainerNotFoundError } from '../../domain/errors/trainer-not-found-error.js';
 import { IPokemonCaptureRepository } from '../../domain/repositories/pokemon-capture-repository.js';
 import { ITrainerRepository } from '../../domain/repositories/trainer-repository.js';
+import { resolveTrainer, TrainerReference } from './resolve-trainer.js';
 
 export class GetActiveTeamUseCase {
   constructor(
@@ -9,10 +9,9 @@ export class GetActiveTeamUseCase {
     private captureRepository: IPokemonCaptureRepository,
   ) {}
 
-  async execute(trainerId: string): Promise<PokemonCapture[]> {
-    const trainer = await this.trainerRepository.findById(trainerId);
-    if (!trainer) throw new TrainerNotFoundError();
+  async execute(reference: TrainerReference): Promise<PokemonCapture[]> {
+    const trainer = await resolveTrainer(this.trainerRepository, reference);
 
-    return this.captureRepository.findActiveByTrainerId(trainerId);
+    return this.captureRepository.findActiveByTrainerId(trainer.id);
   }
 }

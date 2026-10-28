@@ -1,8 +1,11 @@
 import { CapturePokemonUseCase } from '../../application/use-cases/capture-pokemon.js';
 import { CreateTrainerUseCase } from '../../application/use-cases/create-trainer.js';
 import { FindPokemonByNameUseCase } from '../../application/use-cases/find-pokemon-by-name.js';
+import { GetTrainerCaptureHistoryUseCase } from '../../application/use-cases/get-trainer-capture-history.js';
 import { GetActiveTeamUseCase } from '../../application/use-cases/get-active-team.js';
+import { ListTrainersUseCase } from '../../application/use-cases/list-trainers.js';
 import { ReleasePokemonCaptureUseCase } from '../../application/use-cases/release-pokemon-capture.js';
+import { SearchTrainersByNameUseCase } from '../../application/use-cases/search-trainers-by-name.js';
 import { PrismaPokemonCaptureRepository } from '../../infrastructure/database/prisma/prisma-pokemon-capture-repository.js';
 import { PrismaTrainerRepository } from '../../infrastructure/database/prisma/prisma-trainer-repository.js';
 import { PokedexController } from '../../infrastructure/http/controllers/pokedex-controller.js';
@@ -23,13 +26,16 @@ export function makeTrainerPokedexControllers(): {
     ),
     trainerController: new TrainerController(
       new CreateTrainerUseCase(trainerRepository),
+      new ListTrainersUseCase(trainerRepository),
+      new SearchTrainersByNameUseCase(trainerRepository),
       new CapturePokemonUseCase(
         trainerRepository,
         captureRepository,
         pokeApiGateway,
       ),
       new GetActiveTeamUseCase(trainerRepository, captureRepository),
-      new ReleasePokemonCaptureUseCase(captureRepository),
+      new GetTrainerCaptureHistoryUseCase(trainerRepository, captureRepository),
+      new ReleasePokemonCaptureUseCase(captureRepository, trainerRepository),
     ),
   };
 }
